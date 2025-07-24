@@ -72,15 +72,15 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     );
     let walls = load_walls(map);
     for wall in &walls {
-        // draw_poly_lines(
-        //     wall.position.y,
-        //     wall.position.x,
-        //     4,
-        //     wall.size / 2.0_f32.sqrt(),
-        //     45.0,
-        //     1.0,
-        //     GREEN,
-        // );
+        draw_poly_lines(
+            wall.position.y,
+            wall.position.x,
+            4,
+            wall.size / 2.0_f32.sqrt(),
+            45.0,
+            1.0,
+            GREEN,
+        );
     }
     let foods = load_food(map);
     for food in &foods {
@@ -88,33 +88,9 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-// pub fn aabb_collision_center(pos_a: Vec2, size_a: f32, pos_b: Vec2, size_b: f32) -> bool {
-//     let (pos_a_x, pos_a_y) = (pos_a.x, pos_a.y);
-//     // let (aw, ah) = (size_a, size_a);
-//     let (pos_b_x, pos_b_y) = (pos_b.x, pos_b.y);
-//     // let (bw, bh) = (size_b, size_b);
-//
-//     // let half_aw = sizea / 2.0;
-//     // let half_ah = ah / 2.0;
-//     // let half_bw = bw / 2.0;
-//     // let half_bh = bh / 2.0;
-//     let half_size_a = size_a / 2.0_f32.sqrt();
-//     let half_size_b = size_b / 2.0_f32.sqrt();
-// }
-
-// pub fn is_colliding(pos_a: Vec2, mut size_a: f32, pos_b: Vec2, mut size_b: f32) -> bool {
-//     // size_a /= 2.0_f32.sqrt();
-//     // size_a *= 3.5;
-//     // size_b /= 2.0_f32.sqrt();
-//
-//     pos_a.x <= pos_b.x + size_b
-//         && pos_a.x + size_a >= pos_b.x
-//         && pos_a.y <= pos_b.y + size_b
-//         && pos_a.y + size_a >= pos_b.y
-// }
 pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) -> bool {
     let half_a = size_a / 2.0;
-    let half_b = size_b / 2.0_f32.sqrt();
+    let half_b = size_b / 2.0;
 
     let min_a = center_a - half_a;
     let max_a = center_a + half_a;
@@ -124,18 +100,6 @@ pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) ->
 
     min_a.x < max_b.x && max_a.x > min_b.x && min_a.y < max_b.y && max_a.y > min_b.y
 }
-
-// pub fn aabb_collision(object_a: Vec2, object_b: Vec2) -> bool {
-//     a_x_min;
-//     a_x_max;
-//     a_y_min;
-//     a_y_max;
-//
-//     b_x_min;
-//     b_x_max;
-//     b_y_min;
-//     b_y_max;
-// }
 
 pub fn handle_controls() -> char {
     if is_key_pressed(KeyCode::Right) || is_key_pressed(KeyCode::D) {

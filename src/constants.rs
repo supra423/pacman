@@ -15,6 +15,8 @@ pub const RECT_BOTTOM_RIGHT_COORDS: Vec2 = vec2(
 );
 pub const TILE_SIZE: f32 = 32.0;
 
+pub const FPS: f32 = 60.0;
+
 pub const COLS: usize = 28;
 pub const ROWS: usize = 31;
 pub const RAW_MAP: [[u8; COLS]; ROWS] = [
