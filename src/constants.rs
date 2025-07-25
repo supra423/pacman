@@ -5,11 +5,11 @@ pub const CENTER: Vec2 = vec2(WINDOW_SIZE_FINAL.x / 2.0, WINDOW_SIZE_FINAL.y / 2
 
 pub const BOARD_DIMENSIONS: Vec2 = vec2(896.0, 992.0);
 
-pub const RECT_TOP_LEFT_COORDS: Vec2 = vec2(
+pub const BOARD_TOP_LEFT_COORDS: Vec2 = vec2(
     CENTER.x - (BOARD_DIMENSIONS.x / 2.0),
     CENTER.y - (BOARD_DIMENSIONS.y / 2.0),
 );
-pub const RECT_BOTTOM_RIGHT_COORDS: Vec2 = vec2(
+pub const BOARD_BOTTOM_RIGHT_COORDS: Vec2 = vec2(
     CENTER.x + (BOARD_DIMENSIONS.x / 2.0),
     CENTER.y + (BOARD_DIMENSIONS.y / 2.0),
 );

@@ -3,8 +3,8 @@ use crate::game_objects::*;
 use macroquad::prelude::*;
 
 pub fn load_walls(map: [[u8; COLS]; ROWS]) -> Vec<Wall> {
-    let rect_top_left_coords_x = RECT_TOP_LEFT_COORDS.x;
-    let rect_top_left_coords_y = RECT_TOP_LEFT_COORDS.y;
+    let board_top_left_coords_x = BOARD_TOP_LEFT_COORDS.x;
+    let board_top_left_coords_y = BOARD_TOP_LEFT_COORDS.y;
 
     let mut map_walls = Vec::new();
     for i in 0..ROWS {
@@ -12,8 +12,8 @@ pub fn load_walls(map: [[u8; COLS]; ROWS]) -> Vec<Wall> {
             if map[i][j] == 1 {
                 let wall_object = Wall {
                     position: vec2(
-                        rect_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        rect_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
+                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
                     ),
                     size: TILE_SIZE,
                 };
@@ -21,12 +21,12 @@ pub fn load_walls(map: [[u8; COLS]; ROWS]) -> Vec<Wall> {
             }
         }
     }
-    return map_walls;
+    map_walls
 }
 
 pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
-    let rect_top_left_coords_x = RECT_TOP_LEFT_COORDS.x;
-    let rect_top_left_coords_y = RECT_TOP_LEFT_COORDS.y;
+    let board_top_left_coords_x = BOARD_TOP_LEFT_COORDS.x;
+    let board_top_left_coords_y = BOARD_TOP_LEFT_COORDS.y;
 
     let mut map_food = Vec::new();
     for i in 0..ROWS {
@@ -34,8 +34,8 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
             if map[i][j] == 2 {
                 let food_pellet = FoodPellet {
                     position: vec2(
-                        rect_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        rect_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
+                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
                     ),
 
                     size: 4.0,
@@ -45,8 +45,8 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
             } else if map[i][j] == 3 {
                 let power_pellet = FoodPellet {
                     position: vec2(
-                        rect_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        rect_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
+                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
                     ),
 
                     size: 10.0,
@@ -56,14 +56,14 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
             }
         }
     }
-    return map_food;
+    map_food
 }
 
 pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     draw_texture_ex(
         &map_image,
-        RECT_TOP_LEFT_COORDS.x,
-        RECT_TOP_LEFT_COORDS.y,
+        BOARD_TOP_LEFT_COORDS.x,
+        BOARD_TOP_LEFT_COORDS.y,
         WHITE,
         DrawTextureParams {
             dest_size: Some(vec2(BOARD_DIMENSIONS.x, BOARD_DIMENSIONS.y)),
@@ -78,7 +78,7 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
             4,
             wall.size / 2.0_f32.sqrt(),
             45.0,
-            1.0,
+            2.0,
             GREEN,
         );
     }
@@ -86,6 +86,10 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     for food in &foods {
         draw_poly(food.position.y, food.position.x, 4, food.size, 45.0, WHITE);
     }
+}
+
+pub fn draw_characters(pacman: &PacMan) {
+    draw_circle(pacman.position.x, pacman.position.y, pacman.size, YELLOW);
 }
 
 pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) -> bool {
@@ -101,46 +105,45 @@ pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) ->
     min_a.x < max_b.x && max_a.x > min_b.x && min_a.y < max_b.y && max_a.y > min_b.y
 }
 
-pub fn handle_controls() -> char {
+pub fn handle_controls() -> Option<Vec2> {
     if is_key_pressed(KeyCode::Right) || is_key_pressed(KeyCode::D) {
-        return 'r';
+        Some(vec2(1.0, 0.0))
     } else if is_key_pressed(KeyCode::Left) || is_key_pressed(KeyCode::A) {
-        return 'l';
+        Some(vec2(-1.0, 0.0))
     } else if is_key_pressed(KeyCode::Down) || is_key_pressed(KeyCode::S) {
-        return 'd';
+        Some(vec2(0.0, 1.0))
     } else if is_key_pressed(KeyCode::Up) || is_key_pressed(KeyCode::W) {
-        return 'u';
-    }
-    return 'n';
-}
-
-pub fn pacman_movements() -> Option<Vec2> {
-    let input = handle_controls();
-    if input == 'r' {
-        return Some(vec2(1.0, 0.0));
-    } else if input == 'l' {
-        return Some(vec2(-1.0, 0.0));
-    } else if input == 'd' {
-        return Some(vec2(0.0, 1.0));
-    } else if input == 'u' {
-        return Some(vec2(0.0, -1.0));
+        Some(vec2(0.0, -1.0))
     } else if is_key_pressed(KeyCode::Space) {
-        return Some(vec2(0.0, 0.0));
+        Some(vec2(0.0, 0.0))
     } else {
-        return None;
+        None
     }
 }
-pub fn can_move_in_direction(pos: Vec2, direction: Vec2, map: &[[u8; COLS]; ROWS]) -> bool {
-    let next_pos = pos + direction * TILE_SIZE;
 
-    let col = ((next_pos.x / TILE_SIZE).floor()) as usize;
-    let row = ((next_pos.y / TILE_SIZE).floor()) as usize;
-    println!("{col}");
-    println!("{row}");
+pub fn pacman_food_eat(mut map: [[u8; COLS]; ROWS], pacman: &PacMan) -> [[u8; COLS]; ROWS] {
+    let row = ((pacman.position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE) as usize;
+    let col = ((pacman.position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE) as usize;
 
-    if row < map.len() && col < map[0].len() && map[row][col] != 1 {
-        return true;
-    } else {
-        return false;
+    if map[col][row] == 2 || map[col][row] == 3 {
+        map[col][row] = 0;
     }
+    return map;
+}
+pub fn can_move_to_direction(col: usize, row: usize, direction: Vec2) -> bool {
+    // RAW_MAP[y][x] != 1
+    if direction == vec2(1.0, 0.0) && RAW_MAP[col][row + 1] == 1 {
+        false
+    } else if direction == vec2(-1.0, 0.0) && RAW_MAP[col][row - 1] == 1 {
+        false
+    } else if direction == vec2(0.0, 1.0) && RAW_MAP[col + 1][row] == 1 {
+        false
+    } else if direction == vec2(0.0, -1.0) && RAW_MAP[col - 1][row] == 1 {
+        false
+    } else {
+        true
+    }
+}
+pub fn is_x_aligned(pacman: &PacMan) -> bool {
+    pacman.position.x % TILE_SIZE == 0.0
 }
