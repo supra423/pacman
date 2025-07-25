@@ -24,7 +24,7 @@ async fn main() {
     };
     let mut pacman_collision_checker = PacMan {
         position: vec2(CENTER.x, CENTER.y + 256.0),
-        size: TILE_SIZE,
+        size: TILE_SIZE / 4.0,
         direction: vec2(0.0, 0.0),
         speed: 240.0,
         powered_up: false,
@@ -35,12 +35,11 @@ async fn main() {
         let mut can_move = true;
         let frame_time = 1.0 / FPS;
 
+        draw_elements(game_map, &map_image);
         let row = ((pacman_collision_checker.position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE)
             .floor() as usize;
         let col = ((pacman_collision_checker.position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE)
             .floor() as usize;
-
-        draw_elements(game_map, &map_image);
 
         pacman_collision_checker.position +=
             pacman_collision_checker.direction * pacman_collision_checker.speed * frame_time;
@@ -58,9 +57,6 @@ async fn main() {
             input_buffer = direction;
         }
         println!("{}", input_buffer);
-        if can_move_to_direction(col, row, input_buffer) {
-            pacman_collision_checker.direction = input_buffer;
-        }
 
         let mut blocked = false;
         // AABB collision
@@ -94,7 +90,17 @@ async fn main() {
             // print!("{}, ", pacman_collision_checker.direction);
             // println!("{}", input_buffer);
         }
+
+        // align_x(row);
         // println!("{}", next_direction);
+        if can_move_to_direction(col, row, input_buffer) {
+            if !is_x_aligned(&pacman_collision_checker) {
+                //     pacman_collision_checker.position.x =
+                //         align_x(pacman_collision_checker.position.x, input_buffer);
+                //     // println!("{}", pacman_collision_checker.position.x);
+            }
+            pacman_collision_checker.direction = input_buffer;
+        }
 
         pacman.position = pacman_collision_checker.position;
         draw_characters(&pacman);
@@ -104,6 +110,7 @@ async fn main() {
         //     pacman_collision_checker.size / 2.0_f32.sqrt(),
         //     WHITE,
         // );
+        // println!("{}", 1237 % 16);
 
         draw_text(&pacman.position.to_string(), 50.0, 35.0, 15.0, YELLOW);
         draw_text(&col.to_string(), 50.0, 50.0, 15.0, YELLOW);

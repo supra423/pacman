@@ -70,18 +70,18 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
             ..Default::default()
         },
     );
-    let walls = load_walls(map);
-    for wall in &walls {
-        draw_poly_lines(
-            wall.position.y,
-            wall.position.x,
-            4,
-            wall.size / 2.0_f32.sqrt(),
-            45.0,
-            2.0,
-            GREEN,
-        );
-    }
+    // let walls = load_walls(map);
+    // for wall in &walls {
+    //     draw_poly_lines(
+    //         wall.position.y,
+    //         wall.position.x,
+    //         4,
+    //         wall.size / 2.0_f32.sqrt(),
+    //         45.0,
+    //         2.0,
+    //         GREEN,
+    //     );
+    // }
     let foods = load_food(map);
     for food in &foods {
         draw_poly(food.position.y, food.position.x, 4, food.size, 45.0, WHITE);
@@ -145,5 +145,12 @@ pub fn can_move_to_direction(col: usize, row: usize, direction: Vec2) -> bool {
     }
 }
 pub fn is_x_aligned(pacman: &PacMan) -> bool {
-    pacman.position.x % TILE_SIZE == 0.0
+    pacman.position.x % 16.0 == 0.0
 }
+
+// pub fn align_x(pos_x: f32, direction: Vec2) -> f32 {
+//     if direction == vec2(1.0, 0.0) {
+//         let aligned_x = (pos_x % 16);
+//     }
+//     // aligned_x
+// }
