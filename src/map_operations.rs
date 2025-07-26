@@ -3,17 +3,14 @@ use crate::game_objects::*;
 use macroquad::prelude::*;
 
 pub fn load_walls(map: [[u8; COLS]; ROWS]) -> Vec<Wall> {
-    let board_top_left_coords_x = BOARD_TOP_LEFT_COORDS.x;
-    let board_top_left_coords_y = BOARD_TOP_LEFT_COORDS.y;
-
     let mut map_walls = Vec::new();
     for i in 0..ROWS {
         for j in 0..COLS {
             if map[i][j] == 1 {
                 let wall_object = Wall {
                     position: vec2(
-                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.y + (TILE_SIZE * i as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.x + (TILE_SIZE * j as f32) + 16.0,
                     ),
                     size: TILE_SIZE,
                 };
@@ -25,17 +22,14 @@ pub fn load_walls(map: [[u8; COLS]; ROWS]) -> Vec<Wall> {
 }
 
 pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
-    let board_top_left_coords_x = BOARD_TOP_LEFT_COORDS.x;
-    let board_top_left_coords_y = BOARD_TOP_LEFT_COORDS.y;
-
     let mut map_food = Vec::new();
     for i in 0..ROWS {
         for j in 0..COLS {
             if map[i][j] == 2 {
                 let food_pellet = FoodPellet {
                     position: vec2(
-                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.y + (TILE_SIZE * i as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.x + (TILE_SIZE * j as f32) + 16.0,
                     ),
 
                     size: 4.0,
@@ -45,8 +39,8 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
             } else if map[i][j] == 3 {
                 let power_pellet = FoodPellet {
                     position: vec2(
-                        board_top_left_coords_y + (TILE_SIZE * i as f32) + 16.0,
-                        board_top_left_coords_x + (TILE_SIZE * j as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.y + (TILE_SIZE * i as f32) + 16.0,
+                        BOARD_TOP_LEFT_COORDS.x + (TILE_SIZE * j as f32) + 16.0,
                     ),
 
                     size: 10.0,
@@ -92,7 +86,7 @@ pub fn draw_characters(pacman: &PacMan) {
     draw_circle(pacman.position.x, pacman.position.y, pacman.size, YELLOW);
 }
 
-pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) -> bool {
+pub fn aabb_collision(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) -> bool {
     let half_a = size_a / 2.0;
     let half_b = size_b / 2.0;
 
@@ -103,6 +97,20 @@ pub fn is_colliding(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) ->
     let max_b = center_b + half_b;
 
     min_a.x < max_b.x && max_a.x > min_b.x && min_a.y < max_b.y && max_a.y > min_b.y
+}
+
+pub fn collision_check(pacman: &PacMan, walls: Vec<Wall>) -> bool {
+    for wall in &walls {
+        if aabb_collision(
+            pacman.position,
+            pacman.size,
+            vec2(wall.position.y, wall.position.x),
+            wall.size,
+        ) {
+            return true;
+        }
+    }
+    false
 }
 
 pub fn handle_controls() -> Option<Vec2> {
@@ -121,10 +129,7 @@ pub fn handle_controls() -> Option<Vec2> {
     }
 }
 
-pub fn pacman_food_eat(mut map: [[u8; COLS]; ROWS], pacman: &PacMan) -> [[u8; COLS]; ROWS] {
-    let row = ((pacman.position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE) as usize;
-    let col = ((pacman.position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE) as usize;
-
+pub fn pacman_food_eat(mut map: [[u8; COLS]; ROWS], row: usize, col: usize) -> [[u8; COLS]; ROWS] {
     if map[col][row] == 2 || map[col][row] == 3 {
         map[col][row] = 0;
     }
@@ -148,9 +153,27 @@ pub fn is_x_aligned(pacman: &PacMan) -> bool {
     pacman.position.x % 16.0 == 0.0
 }
 
-// pub fn align_x(pos_x: f32, direction: Vec2) -> f32 {
-//     if direction == vec2(1.0, 0.0) {
-//         let aligned_x = (pos_x % 16);
-//     }
-//     // aligned_x
-// }
+pub fn align_x(pos_x: f32, direction: Vec2) -> f32 {
+    let aligned_x: f32;
+    if direction == vec2(1.0, 0.0) {
+        aligned_x = pos_x - 16.0;
+        aligned_x
+    } else {
+        pos_x
+    }
+}
+
+pub fn debug_texts(pacman: &PacMan, row: usize, col: usize, colliding: bool) {
+    let pacman_pos_string = &pacman.position.to_string();
+    let row_string = &col.to_string();
+    let col_string = &row.to_string();
+
+    if colliding {
+        let collision_text = "COLLIDING";
+        draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
+    }
+
+    draw_text(pacman_pos_string, 50.0, 35.0, 15.0, YELLOW);
+    draw_text(row_string, 50.0, 50.0, 15.0, YELLOW);
+    draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
+}
