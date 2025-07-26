@@ -6,7 +6,6 @@ use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
 
-use macroquad::input;
 use macroquad::prelude::*;
 
 #[macroquad::main(window_conf())]
@@ -47,9 +46,51 @@ async fn main() {
 
         let mut colliding = false;
         let walls = load_walls(game_map);
-        // AABB collision
-        if collision_check(&pacman_collision_checker, walls) {
-            colliding = true;
+        // MAIN COLLISION CHECKING
+        if pacman_collision_checker.direction == vec2(1.0, 0.0) {
+            if collision_check(
+                vec2(
+                    pacman_collision_checker.position.x + 12.0,
+                    pacman_collision_checker.position.y,
+                ),
+                pacman_collision_checker.size,
+                walls,
+            ) {
+                colliding = true;
+            }
+        } else if pacman_collision_checker.direction == vec2(-1.0, 0.0) {
+            if collision_check(
+                vec2(
+                    pacman_collision_checker.position.x - 12.0,
+                    pacman_collision_checker.position.y,
+                ),
+                pacman_collision_checker.size,
+                walls,
+            ) {
+                colliding = true;
+            }
+        } else if pacman_collision_checker.direction == vec2(0.0, 1.0) {
+            if collision_check(
+                vec2(
+                    pacman_collision_checker.position.x,
+                    pacman_collision_checker.position.y + 12.0,
+                ),
+                pacman_collision_checker.size,
+                walls,
+            ) {
+                colliding = true;
+            }
+        } else if pacman_collision_checker.direction == vec2(0.0, -1.0) {
+            if collision_check(
+                vec2(
+                    pacman_collision_checker.position.x,
+                    pacman_collision_checker.position.y - 12.0,
+                ),
+                pacman_collision_checker.size,
+                walls,
+            ) {
+                colliding = true;
+            }
         }
 
         if colliding {

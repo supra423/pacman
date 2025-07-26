@@ -99,11 +99,11 @@ pub fn aabb_collision(center_a: Vec2, size_a: f32, center_b: Vec2, size_b: f32) 
     min_a.x < max_b.x && max_a.x > min_b.x && min_a.y < max_b.y && max_a.y > min_b.y
 }
 
-pub fn collision_check(pacman: &PacMan, walls: Vec<Wall>) -> bool {
+pub fn collision_check(pacman_pos: Vec2, pacman_size: f32, walls: Vec<Wall>) -> bool {
     for wall in &walls {
         if aabb_collision(
-            pacman.position,
-            pacman.size,
+            pacman_pos,
+            pacman_size,
             vec2(wall.position.y, wall.position.x),
             wall.size,
         ) {
