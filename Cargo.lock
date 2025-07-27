@@ -212,7 +212,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pacman_map_test5"
+name = "pacman"
 version = "0.1.0"
 dependencies = [
  "macroquad",
