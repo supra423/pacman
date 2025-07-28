@@ -24,41 +24,32 @@ async fn main() {
     };
     let mut pacman_collision_checker = PacMan {
         position: vec2(CENTER.x, CENTER.y + 256.0),
-        size: TILE_SIZE / 4.0,
+        size: TILE_SIZE,
         direction: vec2(0.0, 0.0),
         speed: 300.0,
         powered_up: false,
     };
     loop {
         draw_elements(game_map, &map_image);
-        let row = ((pacman_collision_checker.position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE)
-            .floor() as usize;
-        let col = ((pacman_collision_checker.position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE)
-            .floor() as usize;
         if let Some(direction) = handle_controls() {
             input_buffer = direction;
         }
 
-        // note, one thing I noticed is that, move confirmation must be done before this
-        // line: pacman_collision_checker.position += ....
-        // let pacman_collision_pos = (
-        //     pacman_collision_checker.position.x,
-        //     pacman_collision_checker.position.y,
-        // );
-
         pacman_collision_checker.position +=
             pacman_collision_checker.direction * pacman_collision_checker.speed * frame_time;
 
+        let row = ((pacman_collision_checker.position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE)
+            .floor() as usize;
+        let col = ((pacman_collision_checker.position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE)
+            .floor() as usize;
         let mut colliding = false;
-        let walls = load_walls(game_map);
-        if collision_checking_offset(&pacman_collision_checker, &walls) {
+        if collision_checking_offset(&pacman_collision_checker) {
             colliding = true;
         }
 
         if pacman_collision_checker.direction != input_buffer {
-            if can_move_to_direction(row, col, input_buffer) {
-                pacman_collision_checker.position =
-                    centered_coordinates(pacman_collision_checker.position);
+            if can_move_to_direction(col, row, input_buffer) {
+                pacman_collision_checker.position = centered_coordinates(row as f32, col as f32);
                 pacman_collision_checker.direction = input_buffer;
             }
         } else {
@@ -81,8 +72,8 @@ async fn main() {
             (pacman_collision_checker.position.y).floor(),
         );
         draw_characters(&pacman);
-        debug_texts(&pacman_collision_checker, row, col, colliding);
-        game_map = pacman_food_eat(game_map, row, col);
+        debug_texts(&pacman_collision_checker, col, row, colliding);
+        game_map = pacman_food_eat(game_map, col, row);
         next_frame().await;
     }
 }
