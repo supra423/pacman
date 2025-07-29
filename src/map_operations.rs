@@ -54,43 +54,31 @@ pub fn draw_characters(
     image1: &Texture2D,
     image2: &Texture2D,
     image3: &Texture2D,
-    direction: Vec2,
     timer: u32,
+    colliding: bool,
 ) {
     // draw_circle(pacman.position.x, pacman.position.y, pacman.size, YELLOW);
     let rotation: f32;
-    let flip: bool;
 
-    if direction == vec2(0.0, 0.0) || direction == vec2(-1.0, 0.0) {
+    if pacman.direction == vec2(0.0, 0.0) || pacman.direction == vec2(-1.0, 0.0) {
+        rotation = PI;
+        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+    } else if pacman.direction == vec2(1.0, 0.0) {
         rotation = 0.0;
-        flip = true;
-        draw_pacman(
-            pacman, image1, image2, image3, rotation, flip, timer, direction,
-        );
-    } else if direction == vec2(1.0, 0.0) {
-        rotation = 0.0;
-        flip = false;
-        draw_pacman(
-            pacman, image1, image2, image3, rotation, flip, timer, direction,
-        );
-    } else if direction == vec2(0.0, 1.0) {
+        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+    } else if pacman.direction == vec2(0.0, 1.0) {
+        // PI / 2.0 means a 90 degree rotation
+        // because angles are measured
+        // in radians, instead of degrees
+        // PI is defined in the constants file btw
         rotation = PI / 2.0;
-        flip = false;
-        draw_pacman(
-            pacman, image1, image2, image3, rotation, flip, timer, direction,
-        );
-    } else if direction == vec2(0.0, -1.0) {
-        rotation = PI / 2.0;
-        flip = true;
-        draw_pacman(
-            pacman, image1, image2, image3, rotation, flip, timer, direction,
-        );
-    } else if direction == vec2(0.0, 0.0) {
+        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+    } else if pacman.direction == vec2(0.0, -1.0) {
+        rotation = 3.0 * PI / 2.0; // 270 degrees
+        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+    } else if pacman.direction == vec2(0.0, 0.0) {
         rotation = 0.0;
-        flip = true;
-        draw_pacman(
-            pacman, image1, image2, image3, rotation, flip, timer, direction,
-        );
+        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
     }
 }
 
@@ -100,12 +88,11 @@ pub fn draw_pacman(
     image2: &Texture2D,
     image3: &Texture2D,
     rotation: f32,
-    flip: bool,
     timer: u32,
-    direction: Vec2,
+    colliding: bool,
 ) {
-    let mut value = timer % 20;
-    if value > 15 || direction == vec2(0.0, 0.0) {
+    let value = timer % 20;
+    if value > 15 || pacman.direction == vec2(0.0, 0.0) || colliding {
         draw_texture_ex(
             image2,
             pacman.position.x - 27.5,
@@ -114,7 +101,6 @@ pub fn draw_pacman(
             DrawTextureParams {
                 dest_size: Some(vec2(55.0, 55.0)),
                 rotation: rotation,
-                flip_x: flip,
                 ..Default::default()
             },
         );
@@ -127,7 +113,6 @@ pub fn draw_pacman(
             DrawTextureParams {
                 dest_size: Some(vec2(55.0, 55.0)),
                 rotation: rotation,
-                flip_x: flip,
                 ..Default::default()
             },
         );
@@ -140,7 +125,6 @@ pub fn draw_pacman(
             DrawTextureParams {
                 dest_size: Some(vec2(55.0, 55.0)),
                 rotation: rotation,
-                flip_x: flip,
                 ..Default::default()
             },
         );
@@ -164,19 +148,19 @@ pub fn collision_check(pacman_pos: Vec2) -> bool {
 
 pub fn collision_checking_offset(pacman: &PacMan) -> bool {
     if pacman.direction == vec2(1.0, 0.0)
-        && collision_check(vec2(pacman.position.x + 12.0, pacman.position.y))
+        && collision_check(vec2(pacman.position.x + 16.0, pacman.position.y))
     {
         true
     } else if pacman.direction == vec2(-1.0, 0.0)
-        && collision_check(vec2(pacman.position.x - 12.0, pacman.position.y))
+        && collision_check(vec2(pacman.position.x - 16.0, pacman.position.y))
     {
         true
     } else if pacman.direction == vec2(0.0, 1.0)
-        && collision_check(vec2(pacman.position.x, pacman.position.y + 12.0))
+        && collision_check(vec2(pacman.position.x, pacman.position.y + 16.0))
     {
         true
     } else if pacman.direction == vec2(0.0, -1.0)
-        && collision_check(vec2(pacman.position.x, pacman.position.y - 12.0))
+        && collision_check(vec2(pacman.position.x, pacman.position.y - 16.0))
     {
         true
     } else {
