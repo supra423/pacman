@@ -26,7 +26,6 @@ pub const RAW_MAP: [[u8; COLS]; ROWS] = [
     // 1 = wall
     // 2 = food pellet
     // 3 = power pellet
-    // this will only be used for generating the map itself
     [
         1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ],
