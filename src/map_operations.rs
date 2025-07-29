@@ -49,9 +49,111 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-pub fn draw_characters(pacman: &PacMan) {
-    draw_circle(pacman.position.x, pacman.position.y, pacman.size, YELLOW);
+pub fn draw_characters(
+    pacman: &PacMan,
+    image1: &Texture2D,
+    image2: &Texture2D,
+    image3: &Texture2D,
+    direction: Vec2,
+    timer: u32,
+) {
+    // draw_circle(pacman.position.x, pacman.position.y, pacman.size, YELLOW);
+    let rotation: f32;
+    let flip: bool;
+
+    if direction == vec2(0.0, 0.0) || direction == vec2(-1.0, 0.0) {
+        rotation = 0.0;
+        flip = true;
+        draw_pacman(
+            pacman, image1, image2, image3, rotation, flip, timer, direction,
+        );
+    } else if direction == vec2(1.0, 0.0) {
+        rotation = 0.0;
+        flip = false;
+        draw_pacman(
+            pacman, image1, image2, image3, rotation, flip, timer, direction,
+        );
+    } else if direction == vec2(0.0, 1.0) {
+        rotation = PI / 2.0;
+        flip = false;
+        draw_pacman(
+            pacman, image1, image2, image3, rotation, flip, timer, direction,
+        );
+    } else if direction == vec2(0.0, -1.0) {
+        rotation = PI / 2.0;
+        flip = true;
+        draw_pacman(
+            pacman, image1, image2, image3, rotation, flip, timer, direction,
+        );
+    } else if direction == vec2(0.0, 0.0) {
+        rotation = 0.0;
+        flip = true;
+        draw_pacman(
+            pacman, image1, image2, image3, rotation, flip, timer, direction,
+        );
+    }
 }
+
+pub fn draw_pacman(
+    pacman: &PacMan,
+    image1: &Texture2D,
+    image2: &Texture2D,
+    image3: &Texture2D,
+    rotation: f32,
+    flip: bool,
+    timer: u32,
+    direction: Vec2,
+) {
+    let mut value = timer % 20;
+    if value > 15 || direction == vec2(0.0, 0.0) {
+        draw_texture_ex(
+            image2,
+            pacman.position.x - 27.5,
+            pacman.position.y - 27.5,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(55.0, 55.0)),
+                rotation: rotation,
+                flip_x: flip,
+                ..Default::default()
+            },
+        );
+    } else if value > 10 || value <= 5 {
+        draw_texture_ex(
+            image3,
+            pacman.position.x - 27.5,
+            pacman.position.y - 27.5,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(55.0, 55.0)),
+                rotation: rotation,
+                flip_x: flip,
+                ..Default::default()
+            },
+        );
+    } else {
+        draw_texture_ex(
+            image1,
+            pacman.position.x - 27.5,
+            pacman.position.y - 27.5,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(55.0, 55.0)),
+                rotation: rotation,
+                flip_x: flip,
+                ..Default::default()
+            },
+        );
+    }
+}
+// DrawTextureParams {
+//     dest_size: (),
+//     source: (),
+//     rotation: (),
+//     flip_x: (),
+//     flip_y: (),
+//     pivot: (),
+// },
 
 pub fn collision_check(pacman_pos: Vec2) -> bool {
     let row = (((pacman_pos.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
@@ -133,7 +235,7 @@ pub fn debug_texts(pacman: &PacMan, col: usize, row: usize, colliding: bool) {
     draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
 }
 
-pub fn centered_coordinates(row: f32, col: f32) -> Vec2 {
+pub fn centered_coordinates(col: f32, row: f32) -> Vec2 {
     let centered_x = ((row * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.x) + 16.0;
     let centered_y = ((col * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.y) + 16.0;
     vec2(centered_x, centered_y)

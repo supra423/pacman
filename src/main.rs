@@ -5,13 +5,16 @@ mod map_operations;
 use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
-
 use macroquad::prelude::*;
+// use std::{thread, time::Duration};
 
 #[macroquad::main(window_conf())]
 
 async fn main() {
     let map_image: Texture2D = load_texture("assets/pacmaze2.png").await.unwrap();
+    let pacman_close: Texture2D = load_texture("assets/pacman_open.png").await.unwrap();
+    let pacman_half: Texture2D = load_texture("assets/pacman_half.png").await.unwrap();
+    let pacman_open: Texture2D = load_texture("assets/pacman_close.png").await.unwrap();
     let mut game_map = RAW_MAP;
     let mut input_buffer = vec2(0.0, 0.0);
     let frame_time = 1.0 / FPS;
@@ -19,21 +22,31 @@ async fn main() {
         position: vec2(CENTER.x, CENTER.y + 256.0),
         size: TILE_SIZE,
         direction: vec2(0.0, 0.0),
-        speed: 300.0,
+        speed: 500.0,
         powered_up: false,
     };
     let mut pacman_collision_checker = PacMan {
         position: vec2(CENTER.x, CENTER.y + 256.0),
         size: TILE_SIZE,
         direction: vec2(0.0, 0.0),
-        speed: 300.0,
+        speed: 500.0,
         powered_up: false,
     };
+    let mut timer = 0;
     loop {
+        timer += 1;
         draw_elements(game_map, &map_image);
         if let Some(direction) = handle_controls() {
             input_buffer = direction;
         }
+        draw_characters(
+            &pacman,
+            &pacman_close,
+            &pacman_open,
+            &pacman_half,
+            pacman_collision_checker.direction,
+            timer,
+        );
 
         pacman_collision_checker.position +=
             pacman_collision_checker.direction * pacman_collision_checker.speed * frame_time;
@@ -49,7 +62,7 @@ async fn main() {
 
         if pacman_collision_checker.direction != input_buffer {
             if can_move_to_direction(col, row, input_buffer) {
-                pacman_collision_checker.position = centered_coordinates(row as f32, col as f32);
+                pacman_collision_checker.position = centered_coordinates(col as f32, row as f32);
                 pacman_collision_checker.direction = input_buffer;
             }
         } else {
@@ -71,9 +84,13 @@ async fn main() {
             (pacman_collision_checker.position.x).floor(),
             (pacman_collision_checker.position.y).floor(),
         );
-        draw_characters(&pacman);
-        debug_texts(&pacman_collision_checker, col, row, colliding);
+        debug_texts(&pacman, col, row, colliding);
         game_map = pacman_food_eat(game_map, col, row);
+        if timer == 4_294_967_295 {
+            timer = 0;
+        }
+        // keeping this for debugging some stuff
+        // std::thread::sleep(Duration::from_millis(50));
         next_frame().await;
     }
 }

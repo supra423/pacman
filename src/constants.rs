@@ -16,6 +16,7 @@ pub const BOARD_BOTTOM_RIGHT_COORDS: Vec2 = vec2(
 pub const TILE_SIZE: f32 = 32.0;
 
 pub const FPS: f32 = 60.0;
+pub const PI: f32 = std::f32::consts::PI;
 
 pub const COLS: usize = 28;
 pub const ROWS: usize = 31;
