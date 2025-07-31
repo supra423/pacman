@@ -49,7 +49,7 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-pub fn draw_characters(
+pub fn draw_pacman(
     pacman: &PacMan,
     image1: &Texture2D,
     image2: &Texture2D,
@@ -62,27 +62,27 @@ pub fn draw_characters(
 
     if pacman.direction == vec2(0.0, 0.0) || pacman.direction == vec2(-1.0, 0.0) {
         rotation = PI;
-        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+        animate_pacman_sprite(pacman, image1, image2, image3, rotation, timer, colliding);
     } else if pacman.direction == vec2(1.0, 0.0) {
         rotation = 0.0;
-        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+        animate_pacman_sprite(pacman, image1, image2, image3, rotation, timer, colliding);
     } else if pacman.direction == vec2(0.0, 1.0) {
         // PI / 2.0 means a 90 degree rotation
         // because angles are measured
         // in radians, instead of degrees
         // PI is defined in the constants file btw
         rotation = PI / 2.0;
-        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+        animate_pacman_sprite(pacman, image1, image2, image3, rotation, timer, colliding);
     } else if pacman.direction == vec2(0.0, -1.0) {
         rotation = 3.0 * PI / 2.0; // 270 degrees
-        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+        animate_pacman_sprite(pacman, image1, image2, image3, rotation, timer, colliding);
     } else if pacman.direction == vec2(0.0, 0.0) {
         rotation = 0.0;
-        draw_pacman(pacman, image1, image2, image3, rotation, timer, colliding);
+        animate_pacman_sprite(pacman, image1, image2, image3, rotation, timer, colliding);
     }
 }
 
-pub fn draw_pacman(
+pub fn animate_pacman_sprite(
     pacman: &PacMan,
     image1: &Texture2D,
     image2: &Texture2D,
@@ -130,38 +130,26 @@ pub fn draw_pacman(
         );
     }
 }
-// DrawTextureParams {
-//     dest_size: (),
-//     source: (),
-//     rotation: (),
-//     flip_x: (),
-//     flip_y: (),
-//     pivot: (),
-// },
 
-pub fn collision_check(pacman_pos: Vec2) -> bool {
-    let row = (((pacman_pos.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
-    let col = (((pacman_pos.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
+pub fn collision_check(position: Vec2) -> bool {
+    let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
+    let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
 
     if RAW_MAP[col][row] == 1 { true } else { false }
 }
 
-pub fn collision_checking_offset(pacman: &PacMan) -> bool {
-    if pacman.direction == vec2(1.0, 0.0)
-        && collision_check(vec2(pacman.position.x + 16.0, pacman.position.y))
-    {
+pub fn collision_checking_offset(a: &Entity) -> bool {
+    let (position, direction) = match a {
+        Entity::PacMan(pacman) => (pacman.position, pacman.direction),
+        Entity::Ghost(ghost) => (ghost.position, ghost.direction),
+    };
+    if direction == vec2(1.0, 0.0) && collision_check(vec2(position.x + 16.0, position.y)) {
         true
-    } else if pacman.direction == vec2(-1.0, 0.0)
-        && collision_check(vec2(pacman.position.x - 16.0, pacman.position.y))
-    {
+    } else if direction == vec2(-1.0, 0.0) && collision_check(vec2(position.x - 16.0, position.y)) {
         true
-    } else if pacman.direction == vec2(0.0, 1.0)
-        && collision_check(vec2(pacman.position.x, pacman.position.y + 16.0))
-    {
+    } else if direction == vec2(0.0, 1.0) && collision_check(vec2(position.x, position.y + 16.0)) {
         true
-    } else if pacman.direction == vec2(0.0, -1.0)
-        && collision_check(vec2(pacman.position.x, pacman.position.y - 16.0))
-    {
+    } else if direction == vec2(0.0, -1.0) && collision_check(vec2(position.x, position.y - 16.0)) {
         true
     } else {
         false
@@ -190,7 +178,9 @@ pub fn pacman_food_eat(mut map: [[u8; COLS]; ROWS], col: usize, row: usize) -> [
     }
     return map;
 }
-pub fn can_move_to_direction(col: usize, row: usize, direction: Vec2) -> bool {
+
+pub fn can_move_to_direction(position: Vec2, direction: Vec2) -> bool {
+    let (row, col) = convert_pos_to_index(position);
     if direction == vec2(1.0, 0.0) && RAW_MAP[col][row + 1] == 1 {
         false
     } else if direction == vec2(-1.0, 0.0) && RAW_MAP[col][row - 1] == 1 {
@@ -219,8 +209,15 @@ pub fn debug_texts(pacman: &PacMan, col: usize, row: usize, colliding: bool) {
     draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
 }
 
-pub fn centered_coordinates(col: f32, row: f32) -> Vec2 {
-    let centered_x = ((row * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.x) + 16.0;
-    let centered_y = ((col * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.y) + 16.0;
+pub fn centered_coordinates(position: Vec2) -> Vec2 {
+    let (row, col) = convert_pos_to_index(position);
+    let centered_x = (((row as f32) * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.x) + 16.0;
+    let centered_y = (((col as f32) * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.y) + 16.0;
     vec2(centered_x, centered_y)
+}
+
+pub fn convert_pos_to_index(position: Vec2) -> (usize, usize) {
+    let row = ((position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
+    let col = ((position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
+    (row, col)
 }
