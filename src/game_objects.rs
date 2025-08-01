@@ -48,11 +48,11 @@ pub struct Ghost {
 }
 
 impl Ghost {
-    pub fn new(position: Vec2, speed: f32) -> Self {
+    pub fn new(position: Vec2, speed: f32, direction: Vec2) -> Self {
         Self {
             position,
             size: TILE_SIZE,
-            direction: Vec2::ZERO,
+            direction,
             speed,
             frightened_mode: true,
             scatter_mode: false,
