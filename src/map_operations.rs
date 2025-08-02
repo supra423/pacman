@@ -169,3 +169,36 @@ pub fn fetch_all_moves(
     }
     possible_directions
 }
+
+pub fn update_character_position(a: &Entity, frame_time: f32) -> Vec2 {
+    let (position, direction, speed) = match a {
+        Entity::PacMan(pacman) => (pacman.position, pacman.direction, pacman.speed),
+        Entity::Ghost(ghost) => (ghost.position, ghost.direction, ghost.speed),
+    };
+    let new_position: Vec2 = position + direction * speed * frame_time;
+    new_position
+}
+
+pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
+    if collision_checking_offset(&Entity::Ghost(&ghost), map) {
+        let new_direction =
+            frightened_move(centered_coordinates(ghost.position), ghost.direction, map);
+        let new_position = centered_coordinates(ghost.position);
+        (new_position, new_direction)
+    } else {
+        (ghost.position, ghost.direction)
+    }
+}
+
+pub fn go_to_other_side(a: &Entity) -> f32 {
+    let mut position = match a {
+        Entity::PacMan(pacman) => pacman.position,
+        Entity::Ghost(ghost) => ghost.position,
+    };
+    if position.x > 1036.0 {
+        position.x = 204.0;
+    } else if position.x < 204.0 {
+        position.x = 1036.0;
+    }
+    position.x
+}

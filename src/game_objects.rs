@@ -36,7 +36,7 @@ impl PacMan {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, Copy)]
 pub struct Ghost {
     pub position: Vec2,
     pub direction: Vec2,

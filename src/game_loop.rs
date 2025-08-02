@@ -2,6 +2,7 @@ use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
 use crate::pacman_functions::*;
+use macroquad::input;
 use macroquad::prelude::*;
 use std::time::{Duration, Instant};
 
@@ -11,7 +12,7 @@ pub async fn run() {
     let pacman_open: Texture2D = load_texture("assets/pacman_open.png").await.unwrap();
     let pacman_half: Texture2D = load_texture("assets/pacman_half.png").await.unwrap();
     let mut game_map = RAW_MAP;
-    let mut input_buffer = vec2(0.0, 0.0);
+    let mut next_direction = vec2(0.0, 0.0);
     let frame_time = 1.0 / FPS;
     let mut timer = 0;
 
@@ -31,112 +32,44 @@ pub async fn run() {
         draw_elements(game_map, &map_image);
 
         if let Some(direction) = handle_controls() {
-            input_buffer = direction;
+            next_direction = direction;
         }
 
-        if pacman.direction != input_buffer {
-            if can_move_to_direction(pacman.position, input_buffer, game_map) {
+        if pacman.direction != next_direction {
+            if can_move_to_direction(pacman.position, next_direction, game_map) {
                 pacman.position = centered_coordinates(pacman.position);
-                pacman.direction = input_buffer;
+                pacman.direction = next_direction;
             }
-        } else {
-            pacman.direction = input_buffer;
         }
 
-        pacman.position += pacman.direction * pacman.speed * frame_time;
+        // position calculation
+        pacman.position = update_character_position(&Entity::PacMan(&pacman), frame_time);
 
-        blinky.position += blinky.direction * blinky.speed * frame_time;
-        inky.position += inky.direction * inky.speed * frame_time;
-        pinky.position += pinky.direction * pinky.speed * frame_time;
-        clyde.position += clyde.direction * clyde.speed * frame_time;
+        blinky.position = update_character_position(&Entity::Ghost(&blinky), frame_time);
+        inky.position = update_character_position(&Entity::Ghost(&inky), frame_time);
+        pinky.position = update_character_position(&Entity::Ghost(&pinky), frame_time);
+        clyde.position = update_character_position(&Entity::Ghost(&clyde), frame_time);
 
         let (pacman_row, pacman_col) = convert_pos_to_index(pacman.position);
         let mut pacman_is_colliding = false;
         if collision_checking_offset(&Entity::PacMan(&pacman), game_map) {
             pacman_is_colliding = true;
-        }
-
-        let mut blinky_is_colliding = false;
-        if collision_checking_offset(&Entity::Ghost(&blinky), game_map) {
-            blinky_is_colliding = true;
-        }
-        let mut inky_is_colliding = false;
-        if collision_checking_offset(&Entity::Ghost(&inky), game_map) {
-            inky_is_colliding = true;
-        }
-        let mut pinky_is_colliding = false;
-        if collision_checking_offset(&Entity::Ghost(&pinky), game_map) {
-            pinky_is_colliding = true;
-        }
-        let mut clyde_is_colliding = false;
-        if collision_checking_offset(&Entity::Ghost(&clyde), game_map) {
-            clyde_is_colliding = true;
-        }
-
-        if pacman_is_colliding {
             pacman.position = centered_coordinates(pacman.position);
         }
 
-        if blinky_is_colliding {
-            blinky.direction = frightened_move(
-                centered_coordinates(blinky.position),
-                blinky.direction,
-                game_map,
-            );
-            blinky.position = centered_coordinates(blinky.position);
-        }
+        // frightened position update (TEMPORARY)
+        (blinky.position, blinky.direction) = update_frightened_position(&blinky, game_map);
+        (inky.position, inky.direction) = update_frightened_position(&inky, game_map);
+        (pinky.position, pinky.direction) = update_frightened_position(&pinky, game_map);
+        (clyde.position, clyde.direction) = update_frightened_position(&clyde, game_map);
 
-        if inky_is_colliding {
-            inky.direction = frightened_move(
-                centered_coordinates(inky.position),
-                inky.direction,
-                game_map,
-            );
-            inky.position = centered_coordinates(inky.position);
-        }
-        if pinky_is_colliding {
-            pinky.direction = frightened_move(
-                centered_coordinates(pinky.position),
-                pinky.direction,
-                game_map,
-            );
-            pinky.position = centered_coordinates(pinky.position);
-        }
-        if clyde_is_colliding {
-            clyde.direction = frightened_move(
-                centered_coordinates(clyde.position),
-                clyde.direction,
-                game_map,
-            );
-            clyde.position = centered_coordinates(clyde.position);
-        }
+        // if character goes through tunnel, character goes right out of the other side
+        pacman.position.x = go_to_other_side(&Entity::PacMan(&pacman));
 
-        if pacman.position.x > 1036.0 {
-            pacman.position.x = 204.0;
-        } else if pacman.position.x < 204.0 {
-            pacman.position.x = 1036.0;
-        }
-
-        if blinky.position.x > 1036.0 {
-            blinky.position.x = 204.0;
-        } else if blinky.position.x < 204.0 {
-            blinky.position.x = 1036.0;
-        }
-        if inky.position.x > 1036.0 {
-            inky.position.x = 204.0;
-        } else if inky.position.x < 204.0 {
-            inky.position.x = 1036.0;
-        }
-        if pinky.position.x > 1036.0 {
-            pinky.position.x = 204.0;
-        } else if pinky.position.x < 204.0 {
-            pinky.position.x = 1036.0;
-        }
-        if clyde.position.x > 1036.0 {
-            clyde.position.x = 204.0;
-        } else if clyde.position.x < 204.0 {
-            clyde.position.x = 1036.0;
-        }
+        blinky.position.x = go_to_other_side(&Entity::Ghost(&blinky));
+        inky.position.x = go_to_other_side(&Entity::Ghost(&inky));
+        pinky.position.x = go_to_other_side(&Entity::Ghost(&pinky));
+        clyde.position.x = go_to_other_side(&Entity::Ghost(&clyde));
 
         draw_circle(blinky.position.x, blinky.position.y, blinky.size, RED);
         draw_circle(pinky.position.x, pinky.position.y, blinky.size, PINK);
