@@ -49,25 +49,31 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-pub fn collision_check(position: Vec2) -> bool {
+pub fn collision_check(position: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
     let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
     let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
 
-    if RAW_MAP[col][row] == 1 { true } else { false }
+    if map[col][row] == 1 { true } else { false }
 }
 
-pub fn collision_checking_offset(a: &Entity) -> bool {
+pub fn collision_checking_offset(a: &Entity, map: [[u8; COLS]; ROWS]) -> bool {
     let (position, direction) = match a {
         Entity::PacMan(pacman) => (pacman.position, pacman.direction),
         Entity::Ghost(ghost) => (ghost.position, ghost.direction),
     };
-    if direction == vec2(1.0, 0.0) && collision_check(vec2(position.x + 16.0, position.y)) {
+    if direction == vec2(1.0, 0.0) && collision_check(vec2(position.x + 16.0, position.y), map) {
         true
-    } else if direction == vec2(-1.0, 0.0) && collision_check(vec2(position.x - 16.0, position.y)) {
+    } else if direction == vec2(-1.0, 0.0)
+        && collision_check(vec2(position.x - 16.0, position.y), map)
+    {
         true
-    } else if direction == vec2(0.0, 1.0) && collision_check(vec2(position.x, position.y + 16.0)) {
+    } else if direction == vec2(0.0, 1.0)
+        && collision_check(vec2(position.x, position.y + 16.0), map)
+    {
         true
-    } else if direction == vec2(0.0, -1.0) && collision_check(vec2(position.x, position.y - 16.0)) {
+    } else if direction == vec2(0.0, -1.0)
+        && collision_check(vec2(position.x, position.y - 16.0), map)
+    {
         true
     } else {
         false
@@ -90,15 +96,15 @@ pub fn handle_controls() -> Option<Vec2> {
     }
 }
 
-pub fn can_move_to_direction(position: Vec2, direction: Vec2) -> bool {
+pub fn can_move_to_direction(position: Vec2, direction: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
     let (row, col) = convert_pos_to_index(position);
-    if direction == vec2(1.0, 0.0) && RAW_MAP[col][row + 1] == 1 {
+    if direction == vec2(1.0, 0.0) && map[col][row + 1] == 1 {
         false
-    } else if direction == vec2(-1.0, 0.0) && RAW_MAP[col][row - 1] == 1 {
+    } else if direction == vec2(-1.0, 0.0) && map[col][row - 1] == 1 {
         false
-    } else if direction == vec2(0.0, 1.0) && RAW_MAP[col + 1][row] == 1 {
+    } else if direction == vec2(0.0, 1.0) && map[col + 1][row] == 1 {
         false
-    } else if direction == vec2(0.0, -1.0) && RAW_MAP[col - 1][row] == 1 {
+    } else if direction == vec2(0.0, -1.0) && map[col - 1][row] == 1 {
         false
     } else {
         true
@@ -133,7 +139,21 @@ pub fn convert_pos_to_index(position: Vec2) -> (usize, usize) {
     (row, col)
 }
 
-pub fn frightened_move(position: Vec2, current_direction: Vec2) -> Vec2 {
+pub fn frightened_move(position: Vec2, current_direction: Vec2, map: [[u8; COLS]; ROWS]) -> Vec2 {
+    let mut possible_directions = fetch_all_moves(position, current_direction, map);
+    if !possible_directions.is_empty() {
+        let direction_picker = rand::gen_range(0, possible_directions.len());
+        possible_directions[direction_picker]
+    } else {
+        -current_direction
+    }
+}
+
+pub fn fetch_all_moves(
+    position: Vec2,
+    current_direction: Vec2,
+    map: [[u8; COLS]; ROWS],
+) -> Vec<Vec2> {
     let mut possible_directions = Vec::new();
     let all_directions = [
         vec2(1.0, 0.0),
@@ -143,15 +163,9 @@ pub fn frightened_move(position: Vec2, current_direction: Vec2) -> Vec2 {
     ];
 
     for direction in all_directions {
-        if direction != -current_direction && can_move_to_direction(position, direction) {
+        if direction != -current_direction && can_move_to_direction(position, direction, map) {
             possible_directions.push(direction);
         }
     }
-
-    if !possible_directions.is_empty() {
-        let direction_picker = rand::gen_range(0, possible_directions.len());
-        possible_directions[direction_picker]
-    } else {
-        -current_direction
-    }
+    possible_directions
 }
