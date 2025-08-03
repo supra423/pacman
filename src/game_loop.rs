@@ -11,15 +11,23 @@ pub async fn run() {
     let pacman_close: Texture2D = load_texture("assets/pacman_close.png").await.unwrap();
     let pacman_open: Texture2D = load_texture("assets/pacman_open.png").await.unwrap();
     let pacman_half: Texture2D = load_texture("assets/pacman_half.png").await.unwrap();
+
     let mut game_map = RAW_MAP;
+
+    // for input buffering
     let mut next_direction = vec2(0.0, 0.0);
-    let frame_time = 1.0 / FPS;
+
+    // time between frames
+    // let FRAME_TIME = 1.0 / FPS;
+
+    // for animations and switching between modes of ghosts
     let mut timer = 0;
 
     // for frame limiting
-    let frame_duration = Duration::from_secs_f64(1.0 / FPS as f64);
+    let frame_duration = Duration::from_secs_f64(FRAME_TIME as f64);
 
-    // entities
+    // defining the entities, their initial positions, and speed
+    // the ghosts are already provided with a direction at the start
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
     let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(1.0, 0.0));
     let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(-1.0, 0.0));
@@ -43,14 +51,14 @@ pub async fn run() {
         }
 
         // position calculation
-        pacman.position = update_character_position(&Entity::PacMan(&pacman), frame_time);
+        pacman.move_character(pacman.direction);
 
-        blinky.position = update_character_position(&Entity::Ghost(&blinky), frame_time);
-        inky.position = update_character_position(&Entity::Ghost(&inky), frame_time);
-        pinky.position = update_character_position(&Entity::Ghost(&pinky), frame_time);
-        clyde.position = update_character_position(&Entity::Ghost(&clyde), frame_time);
+        blinky.move_character(blinky.direction);
+        inky.move_character(inky.direction);
+        pinky.move_character(pinky.direction);
+        clyde.move_character(clyde.direction);
 
-        let (pacman_row, pacman_col) = convert_pos_to_index(pacman.position);
+        let (pacman_row, pacman_col) = convert_pos_to_index(&pacman.position);
         let mut pacman_is_colliding = false;
         if collision_checking_offset(&Entity::PacMan(&pacman), game_map) {
             pacman_is_colliding = true;
@@ -64,17 +72,17 @@ pub async fn run() {
         (clyde.position, clyde.direction) = update_frightened_position(&clyde, game_map);
 
         // if character goes through tunnel, character goes right out of the other side
-        pacman.position.x = go_to_other_side(&Entity::PacMan(&pacman));
+        pacman.go_to_other_side();
 
-        blinky.position.x = go_to_other_side(&Entity::Ghost(&blinky));
-        inky.position.x = go_to_other_side(&Entity::Ghost(&inky));
-        pinky.position.x = go_to_other_side(&Entity::Ghost(&pinky));
-        clyde.position.x = go_to_other_side(&Entity::Ghost(&clyde));
+        blinky.go_to_other_side();
+        inky.go_to_other_side();
+        pinky.go_to_other_side();
+        clyde.go_to_other_side();
 
         draw_circle(blinky.position.x, blinky.position.y, blinky.size, RED);
         draw_circle(pinky.position.x, pinky.position.y, blinky.size, PINK);
-        draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
         draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
+        draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
 
         draw_pacman(
             &pacman,
@@ -88,7 +96,7 @@ pub async fn run() {
         debug_texts(&pacman, pacman_col, pacman_row, pacman_is_colliding);
         game_map = pacman_food_eat(game_map, pacman_col, pacman_row);
         if timer == u32::MAX {
-            // reset value if it exceeds
+            // reset timer if it exceeds
             timer = 0;
         }
         // keeping this for debugging some stuff

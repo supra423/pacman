@@ -97,7 +97,7 @@ pub fn handle_controls() -> Option<Vec2> {
 }
 
 pub fn can_move_to_direction(position: Vec2, direction: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
-    let (row, col) = convert_pos_to_index(position);
+    let (row, col) = convert_pos_to_index(&position);
     if direction == vec2(1.0, 0.0) && map[col][row + 1] == 1 {
         false
     } else if direction == vec2(-1.0, 0.0) && map[col][row - 1] == 1 {
@@ -127,13 +127,13 @@ pub fn debug_texts(pacman: &PacMan, col: usize, row: usize, colliding: bool) {
 }
 
 pub fn centered_coordinates(position: Vec2) -> Vec2 {
-    let (row, col) = convert_pos_to_index(position);
+    let (row, col) = convert_pos_to_index(&position);
     let centered_x = (((row as f32) * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.x) + 16.0;
     let centered_y = (((col as f32) * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.y) + 16.0;
     vec2(centered_x, centered_y)
 }
 
-pub fn convert_pos_to_index(position: Vec2) -> (usize, usize) {
+pub fn convert_pos_to_index(position: &Vec2) -> (usize, usize) {
     let row = ((position.x - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
     let col = ((position.y - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
     (row, col)
@@ -170,15 +170,6 @@ pub fn fetch_all_moves(
     possible_directions
 }
 
-pub fn update_character_position(a: &Entity, frame_time: f32) -> Vec2 {
-    let (position, direction, speed) = match a {
-        Entity::PacMan(pacman) => (pacman.position, pacman.direction, pacman.speed),
-        Entity::Ghost(ghost) => (ghost.position, ghost.direction, ghost.speed),
-    };
-    let new_position: Vec2 = position + direction * speed * frame_time;
-    new_position
-}
-
 pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
     if collision_checking_offset(&Entity::Ghost(&ghost), map) {
         let new_direction =
@@ -188,17 +179,4 @@ pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Ve
     } else {
         (ghost.position, ghost.direction)
     }
-}
-
-pub fn go_to_other_side(a: &Entity) -> f32 {
-    let mut position = match a {
-        Entity::PacMan(pacman) => pacman.position,
-        Entity::Ghost(ghost) => ghost.position,
-    };
-    if position.x > 1036.0 {
-        position.x = 204.0;
-    } else if position.x < 204.0 {
-        position.x = 1036.0;
-    }
-    position.x
 }

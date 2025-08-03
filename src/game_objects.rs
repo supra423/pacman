@@ -1,21 +1,18 @@
 use macroquad::math::Vec2;
 
-use crate::constants::TILE_SIZE;
+use crate::constants::{FRAME_TIME, TILE_SIZE};
 
-#[derive(Debug)]
 pub struct Wall {
     pub position: Vec2,
     pub size: f32,
 }
 
-#[derive(Debug)]
 pub struct FoodPellet {
     pub position: Vec2,
     pub size: f32,
     pub power_up: bool,
 }
 
-#[derive(Debug)]
 pub struct PacMan {
     pub position: Vec2,
     pub direction: Vec2,
@@ -34,9 +31,19 @@ impl PacMan {
             powered_up: false,
         }
     }
+    pub fn move_character(&mut self, direction: Vec2) {
+        self.position += direction * self.speed * FRAME_TIME;
+    }
+    pub fn go_to_other_side(&mut self) -> f32 {
+        if self.position.x > 1036.0 {
+            self.position.x = 204.0;
+        } else if self.position.x < 204.0 {
+            self.position.x = 1036.0;
+        }
+        self.position.x
+    }
 }
 
-#[derive(Debug, Clone, Copy)]
 pub struct Ghost {
     pub position: Vec2,
     pub direction: Vec2,
@@ -58,6 +65,17 @@ impl Ghost {
             scatter_mode: false,
             chase_mode: false,
         }
+    }
+    pub fn move_character(&mut self, direction: Vec2) {
+        self.position += direction * self.speed * FRAME_TIME;
+    }
+    pub fn go_to_other_side(&mut self) -> f32 {
+        if self.position.x > 1036.0 {
+            self.position.x = 204.0;
+        } else if self.position.x < 204.0 {
+            self.position.x = 1036.0;
+        }
+        self.position.x
     }
 }
 
