@@ -1,7 +1,7 @@
 use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
-use crate::pacman_functions::*;
+use crate::pacman_methods::*;
 use macroquad::input;
 use macroquad::prelude::*;
 use std::time::{Duration, Instant};
@@ -71,7 +71,7 @@ pub async fn run() {
         (pinky.position, pinky.direction) = update_frightened_position(&pinky, game_map);
         (clyde.position, clyde.direction) = update_frightened_position(&clyde, game_map);
 
-        // if character goes through tunnel, character goes right out of the other side
+        // checks if character goes through tunnel, character goes right out of the other side
         pacman.go_to_other_side();
 
         blinky.go_to_other_side();
@@ -84,8 +84,15 @@ pub async fn run() {
         draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
         draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
 
-        draw_pacman(
-            &pacman,
+        // draw_pacman(
+        //     &pacman,
+        //     &pacman_open,
+        //     &pacman_close,
+        //     &pacman_half,
+        //     timer,
+        //     pacman_is_colliding,
+        // );
+        pacman.draw(
             &pacman_open,
             &pacman_close,
             &pacman_half,

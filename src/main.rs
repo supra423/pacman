@@ -1,8 +1,9 @@
 mod constants;
 mod game_loop;
 mod game_objects;
+mod ghost_methods;
 mod map_operations;
-mod pacman_functions;
+mod pacman_methods;
 
 use crate::constants::*;
 use crate::game_loop::*;
