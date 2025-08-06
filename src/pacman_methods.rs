@@ -112,6 +112,10 @@ impl PacMan {
         }
         return map;
     }
+    pub fn reset_values(&mut self) {
+        self.position = vec2(CENTER.x, CENTER.y + 256.0);
+        self.direction = vec2(0.0, 0.0);
+    }
     pub fn debug_texts(&self, colliding: bool) {
         let pacman_pos_string = &self.position.to_string();
         let (row, col) = convert_pos_to_index(&self.position);

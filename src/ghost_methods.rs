@@ -10,6 +10,7 @@ impl Ghost {
         Self {
             position,
             prev_pos_in_grid: convert_pos_to_index(&position),
+            can_draw: false,
             size: TILE_SIZE,
             direction,
             speed,
@@ -36,7 +37,7 @@ impl Ghost {
         //     blinky.can_change_direction = true;
         // }
         // if self.prev_pos_in_grid != convert_pos_to_index(&self.position) {
-        // println!("a {:?}", self.prev_pos_in_grid);
+        // println71582788.25!("a {:?}", self.prev_pos_in_grid);
         // println!("b {:?}", convert_pos_to_index(&self.position));
         if Entity::Ghost(&self).collision_checking_offset(map) {
             self.can_change_direction = true;
@@ -49,5 +50,10 @@ impl Ghost {
         if self.prev_pos_in_grid != convert_pos_to_index(&self.position) {
             self.can_change_direction = true;
         }
+    }
+    pub fn reset_values(&mut self) {
+        self.position = vec2(CENTER.x, CENTER.y - 128.0);
+        self.direction = vec2(0.0, 0.0);
+        self.can_draw = false;
     }
 }
