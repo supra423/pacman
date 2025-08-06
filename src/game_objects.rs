@@ -18,6 +18,7 @@ pub struct PacMan {
 
 pub struct Ghost {
     pub position: Vec2,
+    pub prev_pos_in_grid: (usize, usize),
     pub direction: Vec2,
     pub size: f32,
     pub speed: f32,

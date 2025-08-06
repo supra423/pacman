@@ -33,25 +33,21 @@ pub async fn run() {
     let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(0.0, 0.0));
     let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(0.0, 0.0));
 
-    let mut blinky_previous_pos = convert_pos_to_index(&blinky.position);
     loop {
         let start = Instant::now();
         timer += 1;
 
-        if timer_function(timer, 1) == 0 {
-            // println!("{}", timer / 60);
+        if timer % 60 == 0 {
+            println!("{}", timer / 60);
         }
-        if timer_function(timer, 5) == 0 {
-            // println!("asd");
-            inky.direction = vec2(-1.0, 0.0);
+        if timer_function(timer, 5) {
+            inky.change_direction(game_map);
         }
-        if timer_function(timer, 10) == 0 {
-            // println!("asd");
-            pinky.direction = vec2(1.0, 0.0);
+        if timer_function(timer, 10) {
+            pinky.change_direction(game_map);
         }
-        if timer_function(timer, 15) == 0 {
-            // println!("asd");
-            clyde.direction = vec2(-1.0, 0.0);
+        if timer_function(timer, 15) {
+            clyde.change_direction(game_map);
         }
 
         draw_elements(game_map, &map_image);
@@ -71,41 +67,19 @@ pub async fn run() {
         pacman.move_character(pacman.direction);
 
         blinky.move_character(blinky.direction);
-        // inky.move_character(inky.direction);
-        // pinky.move_character(pinky.direction);
-        // clyde.move_character(clyde.direction);
+        inky.move_character(inky.direction);
+        pinky.move_character(pinky.direction);
+        clyde.move_character(clyde.direction);
 
         let mut pacman_is_colliding = false;
-        // if collision_checking_offset(&Entity::PacMan(&pacman), game_map) {
         if Entity::PacMan(&pacman).collision_checking_offset(game_map) {
             pacman_is_colliding = true;
             pacman.position = centered_coordinates(pacman.position);
         }
-        // if Entity::Ghost(&blinky).collision_checking_offset(game_map) {
-        //     blinky.position = centered_coordinates(blinky.position);
-        //     // blinky.direction = vec2(0.0, 0.0);
-        // }
-
-        if blinky_previous_pos != convert_pos_to_index(&blinky.position) {
-            blinky.can_change_direction = true;
-            println!("current: {:?}", blinky_previous_pos);
-            println!("previous: {:?}", convert_pos_to_index(&blinky.position));
-        }
-
-        if blinky.can_change_direction {
-            blinky_previous_pos = convert_pos_to_index(&blinky.position);
-            (blinky.position, blinky.direction) = choose_ghost_mode(&blinky, game_map);
-            blinky.can_change_direction = false;
-        }
-        if Entity::Ghost(&blinky).collision_checking_offset(game_map) {
-            // blinky.position = centered_coordinates(blinky.position);
-            // blinky.direction = vec2(0.0, 0.0);
-            blinky.can_change_direction = true;
-        }
-        //
-        // (inky.position, inky.direction) = choose_ghost_mode(&inky, game_map);
-        // (pinky.position, pinky.direction) = choose_ghost_mode(&pinky, game_map);
-        // (clyde.position, clyde.direction) = choose_ghost_mode(&clyde, game_map);
+        blinky.change_direction(game_map);
+        // inky.change_direction(game_map);
+        // pinky.change_direction(game_map);
+        // clyde.change_direction(game_map);
 
         // checks if character goes through tunnel, character goes right out of the other side
         pacman.go_to_other_side();

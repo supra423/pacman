@@ -1,11 +1,15 @@
+use std::convert;
+
 use crate::constants::*;
-use crate::game_objects::Ghost;
+use crate::game_objects::{Entity, Ghost};
+use crate::map_operations::*;
 use macroquad::prelude::*;
 
 impl Ghost {
     pub fn new(position: Vec2, speed: f32, direction: Vec2) -> Self {
         Self {
             position,
+            prev_pos_in_grid: convert_pos_to_index(&position),
             size: TILE_SIZE,
             direction,
             speed,
@@ -26,5 +30,24 @@ impl Ghost {
             self.position.x = 1030.0;
         }
         self.position.x
+    }
+    pub fn change_direction(&mut self, map: [[u8; COLS]; ROWS]) {
+        // if blinky.prev_pos_in_grid != convert_pos_to_index(&blinky.position) {
+        //     blinky.can_change_direction = true;
+        // }
+        // if self.prev_pos_in_grid != convert_pos_to_index(&self.position) {
+        // println!("a {:?}", self.prev_pos_in_grid);
+        // println!("b {:?}", convert_pos_to_index(&self.position));
+        if Entity::Ghost(&self).collision_checking_offset(map) {
+            self.can_change_direction = true;
+        }
+        if self.can_change_direction {
+            self.prev_pos_in_grid = convert_pos_to_index(&self.position);
+            (self.position, self.direction) = update_frightened_position(&self, map);
+            self.can_change_direction = false;
+        }
+        if self.prev_pos_in_grid != convert_pos_to_index(&self.position) {
+            self.can_change_direction = true;
+        }
     }
 }

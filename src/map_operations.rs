@@ -137,7 +137,7 @@ pub fn fetch_all_moves(
 
     for direction in all_directions {
         if direction != -current_direction
-            && direction != current_direction
+            // && direction != current_direction
             && can_move_to_direction(centered_coordinates(position), direction, map)
         {
             possible_directions.push(direction);
@@ -186,7 +186,8 @@ pub fn amount_of_moves_available(
     possible_directions.len()
 }
 
-pub fn timer_function(timer: u32, time_in_seconds: u32) -> u32 {
+pub fn timer_function(timer: u32, time_in_seconds: u32) -> bool {
     let time = time_in_seconds * 60;
-    timer % time
+    // time > timer
+    timer >= time
 }
