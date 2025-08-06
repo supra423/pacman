@@ -1,5 +1,6 @@
 use crate::constants::*;
-use crate::game_objects::*;
+use crate::game_objects::PacMan;
+use crate::map_operations::convert_pos_to_index;
 use macroquad::prelude::*;
 
 impl PacMan {
@@ -16,10 +17,10 @@ impl PacMan {
         self.position += direction * self.speed * FRAME_TIME;
     }
     pub fn go_to_other_side(&mut self) -> f32 {
-        if self.position.x > 1036.0 {
-            self.position.x = 204.0;
-        } else if self.position.x < 204.0 {
-            self.position.x = 1036.0;
+        if self.position.x > 1030.0 {
+            self.position.x = 210.0;
+        } else if self.position.x < 210.0 {
+            self.position.x = 1030.0;
         }
         self.position.x
     }
@@ -33,7 +34,7 @@ impl PacMan {
     ) {
         let rotation: f32;
 
-        if self.direction == vec2(0.0, 0.0) || self.direction == vec2(-1.0, 0.0) {
+        if self.direction == vec2(-1.0, 0.0) {
             rotation = PI;
             self.animate_sprite(image1, image2, image3, rotation, timer, colliding);
         } else if self.direction == vec2(1.0, 0.0) {
@@ -55,7 +56,7 @@ impl PacMan {
         }
     }
 
-    pub fn animate_sprite(
+    fn animate_sprite(
         &self,
         image1: &Texture2D,
         image2: &Texture2D,
@@ -103,11 +104,27 @@ impl PacMan {
             );
         }
     }
-}
+    pub fn food_eat(&self, mut map: [[u8; COLS]; ROWS]) -> [[u8; COLS]; ROWS] {
+        let (row, col) = convert_pos_to_index(&self.position);
 
-pub fn pacman_food_eat(mut map: [[u8; COLS]; ROWS], col: usize, row: usize) -> [[u8; COLS]; ROWS] {
-    if map[col][row] == 2 || map[col][row] == 3 {
-        map[col][row] = 0;
+        if map[col][row] == 2 || map[col][row] == 3 {
+            map[col][row] = 0;
+        }
+        return map;
     }
-    return map;
+    pub fn debug_texts(&self, colliding: bool) {
+        let pacman_pos_string = &self.position.to_string();
+        let (row, col) = convert_pos_to_index(&self.position);
+        let col_string = &col.to_string();
+        let row_string = &row.to_string();
+
+        if colliding {
+            let collision_text = "COLLIDING";
+            draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
+        }
+
+        draw_text(pacman_pos_string, 50.0, 35.0, 15.0, YELLOW);
+        draw_text(row_string, 50.0, 50.0, 15.0, YELLOW);
+        draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
+    }
 }

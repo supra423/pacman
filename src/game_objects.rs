@@ -1,5 +1,6 @@
-use crate::constants::{FRAME_TIME, TILE_SIZE};
-use macroquad::math::Vec2;
+use crate::constants::*;
+use crate::map_operations::*;
+use macroquad::prelude::*;
 
 pub struct FoodPellet {
     pub position: Vec2,
@@ -20,9 +21,11 @@ pub struct Ghost {
     pub direction: Vec2,
     pub size: f32,
     pub speed: f32,
+    pub can_change_direction: bool,
     pub frightened_mode: bool,
     pub scatter_mode: bool,
     pub chase_mode: bool,
+    pub respawn_mode: bool,
 }
 
 pub enum Entity<'a> {

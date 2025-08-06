@@ -1,4 +1,5 @@
 mod constants;
+mod entity_methods;
 mod game_loop;
 mod game_objects;
 mod ghost_methods;

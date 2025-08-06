@@ -49,36 +49,12 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-pub fn collision_check(position: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
-    let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
-    let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
-
-    if map[col][row] == 1 { true } else { false }
-}
-
-pub fn collision_checking_offset(a: &Entity, map: [[u8; COLS]; ROWS]) -> bool {
-    let (position, direction) = match a {
-        Entity::PacMan(pacman) => (pacman.position, pacman.direction),
-        Entity::Ghost(ghost) => (ghost.position, ghost.direction),
-    };
-    if direction == vec2(1.0, 0.0) && collision_check(vec2(position.x + 16.0, position.y), map) {
-        true
-    } else if direction == vec2(-1.0, 0.0)
-        && collision_check(vec2(position.x - 16.0, position.y), map)
-    {
-        true
-    } else if direction == vec2(0.0, 1.0)
-        && collision_check(vec2(position.x, position.y + 16.0), map)
-    {
-        true
-    } else if direction == vec2(0.0, -1.0)
-        && collision_check(vec2(position.x, position.y - 16.0), map)
-    {
-        true
-    } else {
-        false
-    }
-}
+// pub fn collision_check(position: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
+//     let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
+//     let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
+//
+//     if map[col][row] == 1 { true } else { false }
+// }
 
 pub fn handle_controls() -> Option<Vec2> {
     if is_key_pressed(KeyCode::Right) || is_key_pressed(KeyCode::D) {
@@ -111,21 +87,6 @@ pub fn can_move_to_direction(position: Vec2, direction: Vec2, map: [[u8; COLS]; 
     }
 }
 
-pub fn debug_texts(pacman: &PacMan, col: usize, row: usize, colliding: bool) {
-    let pacman_pos_string = &pacman.position.to_string();
-    let col_string = &col.to_string();
-    let row_string = &row.to_string();
-
-    if colliding {
-        let collision_text = "COLLIDING";
-        draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
-    }
-
-    draw_text(pacman_pos_string, 50.0, 35.0, 15.0, YELLOW);
-    draw_text(row_string, 50.0, 50.0, 15.0, YELLOW);
-    draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
-}
-
 pub fn centered_coordinates(position: Vec2) -> Vec2 {
     let (row, col) = convert_pos_to_index(&position);
     let centered_x = (((row as f32) * TILE_SIZE) + BOARD_TOP_LEFT_COORDS.x) + 16.0;
@@ -139,8 +100,8 @@ pub fn convert_pos_to_index(position: &Vec2) -> (usize, usize) {
     (row, col)
 }
 
-pub fn frightened_move(position: Vec2, current_direction: Vec2, map: [[u8; COLS]; ROWS]) -> Vec2 {
-    let mut possible_directions = fetch_all_moves(position, current_direction, map);
+pub fn frightened_mode(position: Vec2, current_direction: Vec2, map: [[u8; COLS]; ROWS]) -> Vec2 {
+    let possible_directions = fetch_all_moves(position, current_direction, map);
     if !possible_directions.is_empty() {
         let direction_picker = rand::gen_range(0, possible_directions.len());
         possible_directions[direction_picker]
@@ -148,6 +109,18 @@ pub fn frightened_move(position: Vec2, current_direction: Vec2, map: [[u8; COLS]
         -current_direction
     }
 }
+
+pub fn choose_ghost_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
+    if ghost.frightened_mode {
+        update_frightened_position(ghost, map)
+    } else {
+        update_frightened_position(ghost, map)
+    }
+}
+
+// pub fn blinky_scatter_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> Vec2 {
+//     if convert_pos_to_index(ghost.position)
+// }
 
 pub fn fetch_all_moves(
     position: Vec2,
@@ -163,7 +136,10 @@ pub fn fetch_all_moves(
     ];
 
     for direction in all_directions {
-        if direction != -current_direction && can_move_to_direction(position, direction, map) {
+        if direction != -current_direction
+            && direction != current_direction
+            && can_move_to_direction(centered_coordinates(position), direction, map)
+        {
             possible_directions.push(direction);
         }
     }
@@ -171,12 +147,46 @@ pub fn fetch_all_moves(
 }
 
 pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
-    if collision_checking_offset(&Entity::Ghost(&ghost), map) {
+    // if Entity::Ghost(&ghost).collision_checking_offset(map) {
+    if (Entity::Ghost(&ghost).collision_checking_offset(map)
+        || amount_of_moves_available(ghost.position, ghost.direction, map) > 1)
+        && ghost.can_change_direction
+    {
         let new_direction =
-            frightened_move(centered_coordinates(ghost.position), ghost.direction, map);
+            frightened_mode(centered_coordinates(ghost.position), ghost.direction, map);
         let new_position = centered_coordinates(ghost.position);
+        // let new_position = ghost.position;
         (new_position, new_direction)
     } else {
         (ghost.position, ghost.direction)
     }
+}
+
+pub fn amount_of_moves_available(
+    position: Vec2,
+    current_direction: Vec2,
+    map: [[u8; COLS]; ROWS],
+) -> usize {
+    let mut possible_directions = Vec::new();
+    let all_directions = [
+        vec2(1.0, 0.0),
+        vec2(-1.0, 0.0),
+        vec2(0.0, 1.0),
+        vec2(0.0, -1.0),
+    ];
+
+    for direction in all_directions {
+        if direction != -current_direction
+            && can_move_to_direction(centered_coordinates(position), direction, map)
+        {
+            possible_directions.push(direction);
+        }
+    }
+    // println!("{}", possible_directions.len());
+    possible_directions.len()
+}
+
+pub fn timer_function(timer: u32, time_in_seconds: u32) -> u32 {
+    let time = time_in_seconds * 60;
+    timer % time
 }

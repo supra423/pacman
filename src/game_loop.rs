@@ -1,7 +1,6 @@
 use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
-use crate::pacman_methods::*;
 use macroquad::input;
 use macroquad::prelude::*;
 use std::time::{Duration, Instant};
@@ -21,7 +20,7 @@ pub async fn run() {
     // let FRAME_TIME = 1.0 / FPS;
 
     // for animations and switching between modes of ghosts
-    let mut timer = 0;
+    let mut timer: u32 = 0;
 
     // for frame limiting
     let frame_duration = Duration::from_secs_f64(FRAME_TIME as f64);
@@ -29,13 +28,31 @@ pub async fn run() {
     // defining the entities, their initial positions, and speed
     // the ghosts are already provided with a direction at the start
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
-    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(1.0, 0.0));
-    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(-1.0, 0.0));
-    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(1.0, 0.0));
-    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 375.0, vec2(-1.0, 0.0));
+    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(1.0, 0.0));
+    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(0.0, 0.0));
+    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(0.0, 0.0));
+    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0, vec2(0.0, 0.0));
+
+    let mut blinky_previous_pos = convert_pos_to_index(&blinky.position);
     loop {
         let start = Instant::now();
         timer += 1;
+
+        if timer_function(timer, 1) == 0 {
+            // println!("{}", timer / 60);
+        }
+        if timer_function(timer, 5) == 0 {
+            // println!("asd");
+            inky.direction = vec2(-1.0, 0.0);
+        }
+        if timer_function(timer, 10) == 0 {
+            // println!("asd");
+            pinky.direction = vec2(1.0, 0.0);
+        }
+        if timer_function(timer, 15) == 0 {
+            // println!("asd");
+            clyde.direction = vec2(-1.0, 0.0);
+        }
 
         draw_elements(game_map, &map_image);
 
@@ -54,22 +71,41 @@ pub async fn run() {
         pacman.move_character(pacman.direction);
 
         blinky.move_character(blinky.direction);
-        inky.move_character(inky.direction);
-        pinky.move_character(pinky.direction);
-        clyde.move_character(clyde.direction);
+        // inky.move_character(inky.direction);
+        // pinky.move_character(pinky.direction);
+        // clyde.move_character(clyde.direction);
 
-        let (pacman_row, pacman_col) = convert_pos_to_index(&pacman.position);
         let mut pacman_is_colliding = false;
-        if collision_checking_offset(&Entity::PacMan(&pacman), game_map) {
+        // if collision_checking_offset(&Entity::PacMan(&pacman), game_map) {
+        if Entity::PacMan(&pacman).collision_checking_offset(game_map) {
             pacman_is_colliding = true;
             pacman.position = centered_coordinates(pacman.position);
         }
+        // if Entity::Ghost(&blinky).collision_checking_offset(game_map) {
+        //     blinky.position = centered_coordinates(blinky.position);
+        //     // blinky.direction = vec2(0.0, 0.0);
+        // }
 
-        // frightened position update (TEMPORARY)
-        (blinky.position, blinky.direction) = update_frightened_position(&blinky, game_map);
-        (inky.position, inky.direction) = update_frightened_position(&inky, game_map);
-        (pinky.position, pinky.direction) = update_frightened_position(&pinky, game_map);
-        (clyde.position, clyde.direction) = update_frightened_position(&clyde, game_map);
+        if blinky_previous_pos != convert_pos_to_index(&blinky.position) {
+            blinky.can_change_direction = true;
+            println!("current: {:?}", blinky_previous_pos);
+            println!("previous: {:?}", convert_pos_to_index(&blinky.position));
+        }
+
+        if blinky.can_change_direction {
+            blinky_previous_pos = convert_pos_to_index(&blinky.position);
+            (blinky.position, blinky.direction) = choose_ghost_mode(&blinky, game_map);
+            blinky.can_change_direction = false;
+        }
+        if Entity::Ghost(&blinky).collision_checking_offset(game_map) {
+            // blinky.position = centered_coordinates(blinky.position);
+            // blinky.direction = vec2(0.0, 0.0);
+            blinky.can_change_direction = true;
+        }
+        //
+        // (inky.position, inky.direction) = choose_ghost_mode(&inky, game_map);
+        // (pinky.position, pinky.direction) = choose_ghost_mode(&pinky, game_map);
+        // (clyde.position, clyde.direction) = choose_ghost_mode(&clyde, game_map);
 
         // checks if character goes through tunnel, character goes right out of the other side
         pacman.go_to_other_side();
@@ -84,14 +120,8 @@ pub async fn run() {
         draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
         draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
 
-        // draw_pacman(
-        //     &pacman,
-        //     &pacman_open,
-        //     &pacman_close,
-        //     &pacman_half,
-        //     timer,
-        //     pacman_is_colliding,
-        // );
+        // println!("{:?}", convert_pos_to_index(&pacman.position));
+
         pacman.draw(
             &pacman_open,
             &pacman_close,
@@ -99,9 +129,10 @@ pub async fn run() {
             timer,
             pacman_is_colliding,
         );
+        // amount_of_moves_available(pacman.position, pacman.direction, game_map);
 
-        debug_texts(&pacman, pacman_col, pacman_row, pacman_is_colliding);
-        game_map = pacman_food_eat(game_map, pacman_col, pacman_row);
+        pacman.debug_texts(pacman_is_colliding);
+        game_map = pacman.food_eat(game_map);
         if timer == u32::MAX {
             // reset timer if it exceeds
             timer = 0;
