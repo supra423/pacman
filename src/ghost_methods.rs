@@ -6,13 +6,13 @@ use crate::map_operations::*;
 use macroquad::prelude::*;
 
 impl Ghost {
-    pub fn new(position: Vec2, speed: f32, direction: Vec2) -> Self {
+    pub fn new(position: Vec2, speed: f32) -> Self {
         Self {
             position,
             prev_pos_in_grid: convert_pos_to_index(&position),
             can_draw: false,
             size: TILE_SIZE,
-            direction,
+            direction: vec2(0.0, 0.0),
             speed,
             can_change_direction: true,
             frightened_mode: true,
@@ -55,5 +55,11 @@ impl Ghost {
         self.direction = vec2(0.0, 0.0);
         self.position = vec2(CENTER.x, CENTER.y - 128.0);
         self.can_draw = false;
+    }
+    pub fn draw_delay(&mut self, timer: u32, frame: u32, map: [[u8; COLS]; ROWS]) {
+        if timer >= frame {
+            self.change_direction(map);
+            self.can_draw = true;
+        }
     }
 }

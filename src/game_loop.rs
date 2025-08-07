@@ -20,12 +20,11 @@ pub async fn run() {
     let frame_duration = Duration::from_secs_f64(FRAME_TIME as f64);
 
     // defining the entities, their initial positions, and speed
-    // the ghosts are already provided with a direction at the start
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
-    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 350.0, vec2(0.0, 0.0));
-    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 350.0, vec2(0.0, 0.0));
-    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 350.0, vec2(0.0, 0.0));
-    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 350.0, vec2(0.0, 0.0));
+    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
+    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
+    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
+    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
 
     loop {
         let start = Instant::now();
@@ -41,25 +40,20 @@ pub async fn run() {
                 game_map = RAW_MAP;
                 timer = 0;
             }
-            // if timer % 60 == 0 {
-            //     println!("{}", timer / 60);
-            // }
-            if timer > 2 {
-                blinky.change_direction(game_map);
-                blinky.can_draw = true;
+            if convert_pos_to_index(&pacman.position) == convert_pos_to_index(&blinky.position)
+                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&inky.position)
+                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&pinky.position)
+                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&clyde.position)
+            {
+                return;
             }
-            if timer_function(timer, 5) {
-                inky.change_direction(game_map);
-                inky.can_draw = true;
+            if timer % 60 == 0 {
+                println!("{}", timer / 60);
             }
-            if timer_function(timer, 10) {
-                pinky.change_direction(game_map);
-                pinky.can_draw = true;
-            }
-            if timer_function(timer, 15) {
-                clyde.change_direction(game_map);
-                clyde.can_draw = true;
-            }
+            blinky.draw_delay(timer, 2, game_map);
+            inky.draw_delay(timer, 300, game_map);
+            pinky.draw_delay(timer, 600, game_map);
+            clyde.draw_delay(timer, 900, game_map);
 
             draw_elements(game_map, &map_image);
 
