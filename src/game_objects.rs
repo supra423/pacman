@@ -10,6 +10,7 @@ pub struct FoodPellet {
 
 pub struct PacMan {
     pub position: Vec2,
+    pub pos_in_grid: (usize, usize),
     pub direction: Vec2,
     pub next_direction: Vec2,
     pub size: f32,
@@ -20,6 +21,7 @@ pub struct PacMan {
 
 pub struct Ghost {
     pub position: Vec2,
+    pub curr_pos_in_grid: (usize, usize),
     pub prev_pos_in_grid: (usize, usize),
     pub can_draw: bool,
     pub direction: Vec2,

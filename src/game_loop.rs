@@ -21,15 +21,15 @@ pub async fn run() {
 
     // defining the entities, their initial positions, and speed
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
-    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
-    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
-    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
-    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 325.0);
+    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
+    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
+    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
+    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
 
     loop {
         let start = Instant::now();
         if timer == 2 {
-            std::thread::sleep(std::time::Duration::from_secs(3));
+            std::thread::sleep(std::time::Duration::from_secs(3)); // reading this line is funny
         } else {
             if load_food(game_map).is_empty() {
                 pacman.reset_values();
@@ -40,10 +40,10 @@ pub async fn run() {
                 game_map = RAW_MAP;
                 timer = 0;
             }
-            if convert_pos_to_index(&pacman.position) == convert_pos_to_index(&blinky.position)
-                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&inky.position)
-                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&pinky.position)
-                || convert_pos_to_index(&pacman.position) == convert_pos_to_index(&clyde.position)
+            if pacman.pos_in_grid == blinky.curr_pos_in_grid
+                || pacman.pos_in_grid == inky.curr_pos_in_grid
+                || pacman.pos_in_grid == pinky.curr_pos_in_grid
+                || pacman.pos_in_grid == clyde.curr_pos_in_grid
             {
                 return;
             }

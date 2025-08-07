@@ -8,6 +8,7 @@ impl PacMan {
     pub fn new(position: Vec2, speed: f32) -> Self {
         Self {
             position,
+            pos_in_grid: convert_pos_to_index(&position),
             size: TILE_SIZE,
             direction: Vec2::ZERO,
             next_direction: Vec2::ZERO,
@@ -18,6 +19,7 @@ impl PacMan {
     }
     pub fn move_character(&mut self, direction: Vec2) {
         self.position += direction * self.speed * FRAME_TIME;
+        self.pos_in_grid = convert_pos_to_index(&self.position);
     }
     pub fn go_to_other_side(&mut self) -> f32 {
         if self.position.x > 1030.0 {

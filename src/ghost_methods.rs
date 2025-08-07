@@ -9,6 +9,7 @@ impl Ghost {
     pub fn new(position: Vec2, speed: f32) -> Self {
         Self {
             position,
+            curr_pos_in_grid: convert_pos_to_index(&position),
             prev_pos_in_grid: convert_pos_to_index(&position),
             can_draw: false,
             size: TILE_SIZE,
@@ -23,6 +24,7 @@ impl Ghost {
     }
     pub fn move_character(&mut self, direction: Vec2) {
         self.position += direction * self.speed * FRAME_TIME;
+        self.curr_pos_in_grid = convert_pos_to_index(&self.position);
     }
     pub fn go_to_other_side(&mut self) -> f32 {
         if self.position.x > 1030.0 {
