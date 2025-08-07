@@ -11,9 +11,11 @@ pub struct FoodPellet {
 pub struct PacMan {
     pub position: Vec2,
     pub direction: Vec2,
+    pub next_direction: Vec2,
     pub size: f32,
     pub speed: f32,
     pub powered_up: bool,
+    pub colliding: bool,
 }
 
 pub struct Ghost {

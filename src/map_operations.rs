@@ -49,13 +49,6 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
     }
 }
 
-// pub fn collision_check(position: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
-//     let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
-//     let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
-//
-//     if map[col][row] == 1 { true } else { false }
-// }
-
 pub fn handle_controls() -> Option<Vec2> {
     if is_key_pressed(KeyCode::Right) || is_key_pressed(KeyCode::D) {
         Some(vec2(1.0, 0.0))
@@ -117,10 +110,6 @@ pub fn choose_ghost_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2)
         update_frightened_position(ghost, map)
     }
 }
-
-// pub fn blinky_scatter_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> Vec2 {
-//     if convert_pos_to_index(ghost.position)
-// }
 
 pub fn fetch_all_moves(
     position: Vec2,

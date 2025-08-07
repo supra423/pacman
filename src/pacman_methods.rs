@@ -1,6 +1,7 @@
 use crate::constants::*;
 use crate::game_objects::PacMan;
-use crate::map_operations::convert_pos_to_index;
+use crate::game_objects::*;
+use crate::map_operations::*;
 use macroquad::prelude::*;
 
 impl PacMan {
@@ -9,8 +10,10 @@ impl PacMan {
             position,
             size: TILE_SIZE,
             direction: Vec2::ZERO,
+            next_direction: Vec2::ZERO,
             speed,
             powered_up: false,
+            colliding: false,
         }
     }
     pub fn move_character(&mut self, direction: Vec2) {
@@ -113,16 +116,33 @@ impl PacMan {
         return map;
     }
     pub fn reset_values(&mut self) {
-        self.position = vec2(CENTER.x, CENTER.y + 256.0);
         self.direction = vec2(0.0, 0.0);
+        self.position = vec2(CENTER.x, CENTER.y + 256.0);
     }
-    pub fn debug_texts(&self, colliding: bool) {
+    pub fn change_directions(&mut self, map: [[u8; COLS]; ROWS]) {
+        if self.direction != self.next_direction {
+            if can_move_to_direction(self.position, self.next_direction, map) {
+                self.position = centered_coordinates(self.position);
+                self.direction = self.next_direction;
+            }
+        }
+    }
+
+    pub fn is_colliding(&mut self, map: [[u8; COLS]; ROWS]) {
+        self.colliding = false;
+        if Entity::PacMan(&self).collision_checking_offset(map) {
+            self.colliding = true;
+            self.position = centered_coordinates(self.position);
+        }
+    }
+
+    pub fn debug_texts(&self) {
         let pacman_pos_string = &self.position.to_string();
         let (row, col) = convert_pos_to_index(&self.position);
         let col_string = &col.to_string();
         let row_string = &row.to_string();
 
-        if colliding {
+        if self.colliding {
             let collision_text = "COLLIDING";
             draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
         }

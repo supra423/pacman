@@ -13,12 +13,6 @@ pub async fn run() {
 
     let mut game_map = RAW_MAP;
 
-    // for input buffering
-    let mut next_direction = vec2(0.0, 0.0);
-
-    // time between frames
-    // let FRAME_TIME = 1.0 / FPS;
-
     // for animations and switching between modes of ghosts
     let mut timer: u32 = 0;
 
@@ -38,9 +32,18 @@ pub async fn run() {
         if timer == 2 {
             std::thread::sleep(std::time::Duration::from_secs(3));
         } else {
-            if timer % 60 == 0 {
-                println!("{}", timer / 60);
+            if load_food(game_map).is_empty() {
+                pacman.reset_values();
+                blinky.reset_values();
+                inky.reset_values();
+                pinky.reset_values();
+                clyde.reset_values();
+                game_map = RAW_MAP;
+                timer = 0;
             }
+            // if timer % 60 == 0 {
+            //     println!("{}", timer / 60);
+            // }
             if timer > 2 {
                 blinky.change_direction(game_map);
                 blinky.can_draw = true;
@@ -61,15 +64,10 @@ pub async fn run() {
             draw_elements(game_map, &map_image);
 
             if let Some(direction) = handle_controls() {
-                next_direction = direction;
+                pacman.next_direction = direction;
             }
 
-            if pacman.direction != next_direction {
-                if can_move_to_direction(pacman.position, next_direction, game_map) {
-                    pacman.position = centered_coordinates(pacman.position);
-                    pacman.direction = next_direction;
-                }
-            }
+            pacman.change_directions(game_map);
 
             // position calculation
             pacman.move_character(pacman.direction);
@@ -79,11 +77,9 @@ pub async fn run() {
             pinky.move_character(pinky.direction);
             clyde.move_character(clyde.direction);
 
-            let mut pacman_is_colliding = false;
-            if Entity::PacMan(&pacman).collision_checking_offset(game_map) {
-                pacman_is_colliding = true;
-                pacman.position = centered_coordinates(pacman.position);
-            }
+            // collision detection
+            pacman.is_colliding(game_map);
+
             blinky.change_direction(game_map);
 
             // checks if character goes through tunnel, character goes right out of the other side
@@ -114,11 +110,11 @@ pub async fn run() {
                 &pacman_close,
                 &pacman_half,
                 timer,
-                pacman_is_colliding,
+                pacman.colliding,
             );
             // amount_of_moves_available(pacman.position, pacman.direction, game_map);
 
-            pacman.debug_texts(pacman_is_colliding);
+            pacman.debug_texts();
             game_map = pacman.food_eat(game_map);
             if timer == u32::MAX {
                 // reset timer if it exceeds
@@ -129,15 +125,6 @@ pub async fn run() {
             let elapsed = start.elapsed();
             if elapsed < frame_duration {
                 std::thread::sleep(frame_duration - elapsed);
-            }
-            if load_food(game_map).is_empty() {
-                pacman.reset_values();
-                blinky.reset_values();
-                inky.reset_values();
-                pinky.reset_values();
-                clyde.reset_values();
-                game_map = RAW_MAP;
-                timer = 0;
             }
             next_frame().await;
         }

@@ -52,8 +52,8 @@ impl Ghost {
         }
     }
     pub fn reset_values(&mut self) {
-        self.position = vec2(CENTER.x, CENTER.y - 128.0);
         self.direction = vec2(0.0, 0.0);
+        self.position = vec2(CENTER.x, CENTER.y - 128.0);
         self.can_draw = false;
     }
 }
