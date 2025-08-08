@@ -166,6 +166,7 @@ pub fn amount_of_moves_available(
 
     for direction in all_directions {
         if direction != -current_direction
+            && direction != current_direction
             && can_move_to_direction(centered_coordinates(position), direction, map)
         {
             possible_directions.push(direction);

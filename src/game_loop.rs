@@ -40,15 +40,35 @@ pub async fn run() {
                 game_map = RAW_MAP;
                 timer = 0;
             }
-            if pacman.pos_in_grid == blinky.curr_pos_in_grid
-                || pacman.pos_in_grid == inky.curr_pos_in_grid
-                || pacman.pos_in_grid == pinky.curr_pos_in_grid
-                || pacman.pos_in_grid == clyde.curr_pos_in_grid
-            {
-                return;
+            if !pacman.powered_up {
+                if pacman.pos_in_grid == blinky.curr_pos_in_grid
+                    || pacman.pos_in_grid == inky.curr_pos_in_grid
+                    || pacman.pos_in_grid == pinky.curr_pos_in_grid
+                    || pacman.pos_in_grid == clyde.curr_pos_in_grid
+                {
+                    return;
+                }
+            } else {
+                pacman.power_up_timer += 1;
+                if pacman.power_up_timer <= 360 {
+                    if pacman.pos_in_grid == blinky.curr_pos_in_grid {
+                        blinky.reset_values();
+                    } else if pacman.pos_in_grid == inky.curr_pos_in_grid {
+                        inky.reset_values();
+                    } else if pacman.pos_in_grid == pinky.curr_pos_in_grid {
+                        pinky.reset_values();
+                    } else if pacman.pos_in_grid == clyde.curr_pos_in_grid {
+                        clyde.reset_values();
+                    }
+                } else {
+                    pacman.powered_up = false;
+                    pacman.power_up_timer = 0;
+                }
             }
+            println!("{}", pacman.power_up_timer);
+
             if timer % 60 == 0 {
-                println!("{}", timer / 60);
+                // println!("{}", timer / 60);
             }
             blinky.draw_delay(timer, 2, game_map);
             inky.draw_delay(timer, 300, game_map);

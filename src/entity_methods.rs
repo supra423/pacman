@@ -3,6 +3,20 @@ use crate::game_objects::Entity;
 use macroquad::prelude::*;
 
 impl Entity<'_> {
+    fn get_pos(&self) -> Vec2 {
+        let position = match self {
+            Entity::PacMan(pacman) => pacman.position,
+            Entity::Ghost(ghost) => ghost.position,
+        };
+        position
+    }
+    fn get_dir(&self) -> Vec2 {
+        let direction = match self {
+            Entity::PacMan(pacman) => pacman.direction,
+            Entity::Ghost(ghost) => ghost.direction,
+        };
+        direction
+    }
     fn collision_check(&self, position: Vec2, map: [[u8; COLS]; ROWS]) -> bool {
         let row = (((position.x) - BOARD_TOP_LEFT_COORDS.x) / TILE_SIZE).floor() as usize;
         let col = (((position.y) - BOARD_TOP_LEFT_COORDS.y) / TILE_SIZE).floor() as usize;
@@ -10,10 +24,12 @@ impl Entity<'_> {
         if map[col][row] == 1 { true } else { false }
     }
     pub fn collision_checking_offset(&self, map: [[u8; COLS]; ROWS]) -> bool {
-        let (position, direction) = match self {
-            Entity::PacMan(pacman) => (pacman.position, pacman.direction),
-            Entity::Ghost(ghost) => (ghost.position, ghost.direction),
-        };
+        // let (position, direction) = match self {
+        //     Entity::PacMan(pacman) => (pacman.position, pacman.direction),
+        //     Entity::Ghost(ghost) => (ghost.position, ghost.direction),
+        // };
+        let position = self.get_pos();
+        let direction = self.get_dir();
         if direction == vec2(1.0, 0.0)
             && self.collision_check(vec2(position.x + 16.0, position.y), map)
         {

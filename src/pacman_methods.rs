@@ -14,6 +14,7 @@ impl PacMan {
             next_direction: Vec2::ZERO,
             speed,
             powered_up: false,
+            power_up_timer: 0,
             colliding: false,
         }
     }
@@ -109,10 +110,15 @@ impl PacMan {
             );
         }
     }
-    pub fn food_eat(&self, mut map: [[u8; COLS]; ROWS]) -> [[u8; COLS]; ROWS] {
+    pub fn food_eat(&mut self, mut map: [[u8; COLS]; ROWS]) -> [[u8; COLS]; ROWS] {
         let (row, col) = convert_pos_to_index(&self.position);
 
-        if map[col][row] == 2 || map[col][row] == 3 {
+        if map[col][row] == 2 {
+            map[col][row] = 0;
+        }
+        if map[col][row] == 3 {
+            self.powered_up = true;
+            self.power_up_timer = 0;
             map[col][row] = 0;
         }
         return map;
