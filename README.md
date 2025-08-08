@@ -8,13 +8,15 @@ this project because summer break is almost over and I'm gonna get
 hella busy in University again, I just hope I'll finish this before
 classes start again! A star would be nice though ;>
 
-If you're gonna ask about cross-platform compatibility stuff, I'm not
-actually sure if this is even available for windows because...
+It is primarily available for arch linux because...
 
-"I use arch btw..."
+"I use Arch btw"
 
-but I'm pretty sure I didn't placed any platform-specific function calls
-and code in the project, not to mention, Macroquad itself is cross-platform.
-So I guess this is available in windows? I can't give assurance to this though lol.
-I'm still not planning on making this cross-platform though because this is just a
-personal project for learning Rust, but if you are willing to help me, that would be great!
+For other linux distros, I'm not really sure, but I think it should work perfectly!
+I just don't have any way to confirm it because I have no other people I know
+that use Linux (It's lonely being an Arch user tbh).
+
+It is also available for windows (tested by a good friend of mine).
+
+This is just a project for learning Rust and game development, I do
+not intend to monetize this project so Namco please don't sue me ;(
