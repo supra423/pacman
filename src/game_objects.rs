@@ -5,7 +5,6 @@ use macroquad::prelude::*;
 pub struct FoodPellet {
     pub position: Vec2,
     pub size: f32,
-    pub power_up: bool,
 }
 
 pub struct PacMan {
@@ -18,6 +17,8 @@ pub struct PacMan {
     pub powered_up: bool,
     pub colliding: bool,
     pub power_up_timer: u32,
+    pub score: u32,
+    pub lives: u8,
 }
 
 pub struct Ghost {

@@ -16,6 +16,8 @@ impl PacMan {
             powered_up: false,
             power_up_timer: 0,
             colliding: false,
+            score: 0,
+            lives: 3,
         }
     }
     pub fn move_character(&mut self, direction: Vec2) {
@@ -114,16 +116,29 @@ impl PacMan {
         let (row, col) = convert_pos_to_index(&self.position);
 
         if map[col][row] == 2 {
+            self.score += 10;
             map[col][row] = 0;
         }
         if map[col][row] == 3 {
+            self.score += 50;
             self.powered_up = true;
             self.power_up_timer = 0;
             map[col][row] = 0;
         }
         return map;
     }
+    pub fn aabb(&self, ghost: &Ghost) -> bool {
+        let a_min = self.position - Vec2::splat(TILE_SIZE / 2.0);
+        let a_max = self.position + Vec2::splat(TILE_SIZE / 2.0);
+
+        let b_min = ghost.position - Vec2::splat(TILE_SIZE / 2.0);
+        let b_max = ghost.position + Vec2::splat(TILE_SIZE / 2.0);
+
+        a_min.x < b_max.x && a_max.x > b_min.x && a_min.y < b_max.y && a_max.y > b_min.y
+    }
+
     pub fn reset_values(&mut self) {
+        self.powered_up = false;
         self.direction = vec2(0.0, 0.0);
         self.position = vec2(CENTER.x, CENTER.y + 256.0);
     }
@@ -142,6 +157,18 @@ impl PacMan {
             self.colliding = true;
             self.position = centered_coordinates(self.position);
         }
+    }
+
+    pub fn draw_score(&self) {
+        let score_text = &self.score.to_string();
+        let formatted_score = format!("SCORE: {score_text}");
+        draw_text(&formatted_score, 200.0, 35.0, 30.0, WHITE);
+    }
+
+    pub fn draw_lives(&self) {
+        let lives_text = &self.lives.to_string();
+        let formatted_score = format!("LIVES: {lives_text}");
+        draw_text(&formatted_score, 50.0, 100.0, 30.0, WHITE);
     }
 
     pub fn debug_texts(&self) {

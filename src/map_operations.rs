@@ -13,7 +13,6 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
                         BOARD_TOP_LEFT_COORDS.x + (TILE_SIZE * j as f32) + 16.0,
                     ),
                     size: 4.0,
-                    power_up: false,
                 };
                 map_food.push(food_pellet);
             } else if map[i][j] == 3 {
@@ -23,7 +22,6 @@ pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
                         BOARD_TOP_LEFT_COORDS.x + (TILE_SIZE * j as f32) + 16.0,
                     ),
                     size: 10.0,
-                    power_up: true,
                 };
                 map_food.push(power_pellet);
             }
@@ -143,7 +141,13 @@ pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Ve
     {
         let new_direction =
             frightened_mode(centered_coordinates(ghost.position), ghost.direction, map);
-        let new_position = centered_coordinates(ghost.position);
+        let new_position: Vec2;
+        if new_direction == ghost.direction {
+            new_position = ghost.position;
+        } else {
+            new_position = centered_coordinates(ghost.position);
+        }
+
         // let new_position = ghost.position;
         (new_position, new_direction)
     } else {

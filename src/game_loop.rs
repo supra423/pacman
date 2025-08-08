@@ -21,10 +21,12 @@ pub async fn run() {
 
     // defining the entities, their initial positions, and speed
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
-    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
-    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
-    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
-    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 128.0), 300.0);
+    // self.position = vec2(CENTER.x, CENTER.y - 32.0);
+
+    let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
+    let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
+    let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
+    let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
 
     loop {
         let start = Instant::now();
@@ -41,23 +43,34 @@ pub async fn run() {
                 timer = 0;
             }
             if !pacman.powered_up {
-                if pacman.pos_in_grid == blinky.curr_pos_in_grid
-                    || pacman.pos_in_grid == inky.curr_pos_in_grid
-                    || pacman.pos_in_grid == pinky.curr_pos_in_grid
-                    || pacman.pos_in_grid == clyde.curr_pos_in_grid
+                if pacman.aabb(&blinky)
+                    || pacman.aabb(&inky)
+                    || pacman.aabb(&pinky)
+                    || pacman.aabb(&clyde)
                 {
-                    return;
+                    if pacman.lives > 0 {
+                        pacman.lives -= 1;
+
+                        pacman.reset_values();
+                        blinky.reset_values();
+                        inky.reset_values();
+                        pinky.reset_values();
+                        clyde.reset_values();
+                        timer = 0;
+                    } else {
+                        return;
+                    }
                 }
             } else {
                 pacman.power_up_timer += 1;
                 if pacman.power_up_timer <= 360 {
-                    if pacman.pos_in_grid == blinky.curr_pos_in_grid {
+                    if pacman.aabb(&blinky) {
                         blinky.reset_values();
-                    } else if pacman.pos_in_grid == inky.curr_pos_in_grid {
+                    } else if pacman.aabb(&inky) {
                         inky.reset_values();
-                    } else if pacman.pos_in_grid == pinky.curr_pos_in_grid {
+                    } else if pacman.aabb(&pinky) {
                         pinky.reset_values();
-                    } else if pacman.pos_in_grid == clyde.curr_pos_in_grid {
+                    } else if pacman.aabb(&clyde) {
                         clyde.reset_values();
                     }
                 } else {
@@ -65,11 +78,10 @@ pub async fn run() {
                     pacman.power_up_timer = 0;
                 }
             }
-            println!("{}", pacman.power_up_timer);
 
-            if timer % 60 == 0 {
-                // println!("{}", timer / 60);
-            }
+            // if timer % 60 == 0 {
+            // println!("{}", timer / 60);
+            // }
             blinky.draw_delay(timer, 2, game_map);
             inky.draw_delay(timer, 300, game_map);
             pinky.draw_delay(timer, 600, game_map);
@@ -105,16 +117,32 @@ pub async fn run() {
             clyde.go_to_other_side();
 
             if blinky.can_draw {
-                draw_circle(blinky.position.x, blinky.position.y, blinky.size, RED);
+                if pacman.powered_up {
+                    draw_circle(blinky.position.x, blinky.position.y, blinky.size, LIGHTGRAY);
+                } else {
+                    draw_circle(blinky.position.x, blinky.position.y, blinky.size, RED);
+                }
             }
             if inky.can_draw {
-                draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
+                if pacman.powered_up {
+                    draw_circle(inky.position.x, inky.position.y, blinky.size, LIGHTGRAY);
+                } else {
+                    draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
+                }
             }
             if pinky.can_draw {
-                draw_circle(pinky.position.x, pinky.position.y, blinky.size, PINK);
+                if pacman.powered_up {
+                    draw_circle(pinky.position.x, pinky.position.y, blinky.size, LIGHTGRAY);
+                } else {
+                    draw_circle(pinky.position.x, pinky.position.y, blinky.size, PINK);
+                }
             }
             if clyde.can_draw {
-                draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
+                if pacman.powered_up {
+                    draw_circle(clyde.position.x, clyde.position.y, blinky.size, LIGHTGRAY);
+                } else {
+                    draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
+                }
             }
 
             // println!("{:?}", convert_pos_to_index(&pacman.position));
@@ -129,6 +157,8 @@ pub async fn run() {
             // amount_of_moves_available(pacman.position, pacman.direction, game_map);
 
             pacman.debug_texts();
+            pacman.draw_score();
+            pacman.draw_lives();
             game_map = pacman.food_eat(game_map);
             if timer == u32::MAX {
                 // reset timer if it exceeds

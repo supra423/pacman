@@ -35,12 +35,6 @@ impl Ghost {
         self.position.x
     }
     pub fn change_direction(&mut self, map: [[u8; COLS]; ROWS]) {
-        // if blinky.prev_pos_in_grid != convert_pos_to_index(&blinky.position) {
-        //     blinky.can_change_direction = true;
-        // }
-        // if self.prev_pos_in_grid != convert_pos_to_index(&self.position) {
-        // println71582788.25!("a {:?}", self.prev_pos_in_grid);
-        // println!("b {:?}", convert_pos_to_index(&self.position));
         if Entity::Ghost(&self).collision_checking_offset(map) {
             self.can_change_direction = true;
         }
@@ -62,6 +56,10 @@ impl Ghost {
         if timer >= frame {
             self.change_direction(map);
             self.can_draw = true;
+        }
+        if timer == frame - 1 || timer == frame {
+            self.position = vec2(CENTER.x, CENTER.y - 128.0);
+            self.direction = vec2(0.0, -1.0);
         }
     }
 }
