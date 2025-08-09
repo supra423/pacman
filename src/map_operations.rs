@@ -101,13 +101,13 @@ pub fn frightened_mode(position: Vec2, current_direction: Vec2, map: [[u8; COLS]
     }
 }
 
-pub fn choose_ghost_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
-    if ghost.frightened_mode {
-        update_frightened_position(ghost, map)
-    } else {
-        update_frightened_position(ghost, map)
-    }
-}
+// pub fn choose_ghost_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
+//     if ghost.frightened_mode {
+//         update_frightened_position(ghost, map)
+//     } else {
+//         update_frightened_position(ghost, map)
+//     }
+// }
 
 pub fn fetch_all_moves(
     position: Vec2,
@@ -180,8 +180,8 @@ pub fn amount_of_moves_available(
     possible_directions.len()
 }
 
-pub fn timer_function(timer: u32, time_in_seconds: u32) -> bool {
-    let time = time_in_seconds * 60;
-    // time > timer
-    timer >= time
-}
+// pub fn timer_function(timer: u32, time_in_seconds: u32) -> bool {
+//     let time = time_in_seconds * 60;
+//     // time > timer
+//     timer >= time
+// }

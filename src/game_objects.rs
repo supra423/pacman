@@ -1,5 +1,5 @@
-use crate::constants::*;
-use crate::map_operations::*;
+// use crate::constants::*;
+// use crate::map_operations::*;
 use macroquad::prelude::*;
 
 pub struct FoodPellet {
@@ -12,7 +12,7 @@ pub struct PacMan {
     pub pos_in_grid: (usize, usize),
     pub direction: Vec2,
     pub next_direction: Vec2,
-    pub size: f32,
+    // pub size: f32,
     pub speed: f32,
     pub powered_up: bool,
     pub colliding: bool,
@@ -30,9 +30,9 @@ pub struct Ghost {
     pub size: f32,
     pub speed: f32,
     pub can_change_direction: bool,
-    pub frightened_mode: bool,
-    pub scatter_mode: bool,
-    pub chase_mode: bool,
+    // pub frightened_mode: bool,
+    // pub scatter_mode: bool,
+    // pub chase_mode: bool,
     pub respawn_mode: bool,
 }
 

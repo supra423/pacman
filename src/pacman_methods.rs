@@ -9,7 +9,7 @@ impl PacMan {
         Self {
             position,
             pos_in_grid: convert_pos_to_index(&position),
-            size: TILE_SIZE,
+            // size: TILE_SIZE,
             direction: Vec2::ZERO,
             next_direction: Vec2::ZERO,
             speed,
@@ -23,14 +23,6 @@ impl PacMan {
     pub fn move_character(&mut self, direction: Vec2) {
         self.position += direction * self.speed * FRAME_TIME;
         self.pos_in_grid = convert_pos_to_index(&self.position);
-    }
-    pub fn go_to_other_side(&mut self) -> f32 {
-        if self.position.x > 1030.0 {
-            self.position.x = 210.0;
-        } else if self.position.x < 210.0 {
-            self.position.x = 1030.0;
-        }
-        self.position.x
     }
     pub fn draw(
         &self,
@@ -49,7 +41,7 @@ impl PacMan {
             rotation = 0.0;
             self.animate_sprite(image1, image2, image3, rotation, timer, colliding);
         } else if self.direction == vec2(0.0, 1.0) {
-            // PI / 2.0 means a 90 degree rotation
+            // PI / 2.0 means a 90-degree rotation
             // because angles are measured
             // in radians, instead of degrees
             // PI is defined in the constants file btw
@@ -82,7 +74,7 @@ impl PacMan {
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(55.0, 55.0)),
-                    rotation: rotation,
+                    rotation,
                     ..Default::default()
                 },
             );
@@ -94,7 +86,7 @@ impl PacMan {
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(55.0, 55.0)),
-                    rotation: rotation,
+                    rotation,
                     ..Default::default()
                 },
             );
@@ -106,7 +98,7 @@ impl PacMan {
                 WHITE,
                 DrawTextureParams {
                     dest_size: Some(vec2(55.0, 55.0)),
-                    rotation: rotation,
+                    rotation,
                     ..Default::default()
                 },
             );
@@ -125,7 +117,7 @@ impl PacMan {
             self.power_up_timer = 0;
             map[col][row] = 0;
         }
-        return map;
+        map
     }
     pub fn aabb(&self, ghost: &Ghost) -> bool {
         let a_min = self.position - Vec2::splat(TILE_SIZE / 2.0);
@@ -151,7 +143,7 @@ impl PacMan {
         }
     }
 
-    pub fn is_colliding(&mut self, map: [[u8; COLS]; ROWS]) {
+    pub fn colliding(&mut self, map: [[u8; COLS]; ROWS]) {
         self.colliding = false;
         if Entity::PacMan(&self).collision_checking_offset(map) {
             self.colliding = true;

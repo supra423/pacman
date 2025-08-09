@@ -1,5 +1,5 @@
 use crate::constants::*;
-use crate::game_objects::Entity;
+use crate::game_objects::*;
 use macroquad::prelude::*;
 
 impl Entity<'_> {
@@ -50,4 +50,14 @@ impl Entity<'_> {
             false
         }
     }
+    pub fn go_to_other_side(&mut self) -> f32 {
+        let mut position = self.get_pos();
+        if position.x > 1030.0 {
+           position.x = 210.0;
+        } else if position.x < 210.0 {
+            position.x = 1030.0;
+        }
+        position.x
+    }
+
 }

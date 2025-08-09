@@ -1,7 +1,5 @@
-use std::convert;
-
 use crate::constants::*;
-use crate::game_objects::{Entity, Ghost};
+use crate::game_objects::{Entity, Ghost, PacMan};
 use crate::map_operations::*;
 use macroquad::prelude::*;
 
@@ -16,23 +14,15 @@ impl Ghost {
             direction: vec2(0.0, 0.0),
             speed,
             can_change_direction: true,
-            frightened_mode: true,
-            scatter_mode: false,
-            chase_mode: false,
+            // frightened_mode: true,
+            // scatter_mode: false,
+            // chase_mode: false,
             respawn_mode: false,
         }
     }
     pub fn move_character(&mut self, direction: Vec2) {
         self.position += direction * self.speed * FRAME_TIME;
         self.curr_pos_in_grid = convert_pos_to_index(&self.position);
-    }
-    pub fn go_to_other_side(&mut self) -> f32 {
-        if self.position.x > 1030.0 {
-            self.position.x = 210.0;
-        } else if self.position.x < 210.0 {
-            self.position.x = 1030.0;
-        }
-        self.position.x
     }
     pub fn change_direction(&mut self, map: [[u8; COLS]; ROWS]) {
         if Entity::Ghost(&self).collision_checking_offset(map) {
@@ -62,4 +52,14 @@ impl Ghost {
             self.direction = vec2(0.0, -1.0);
         }
     }
+    pub fn draw_color_switch(&self, pacman: &PacMan, color: Color) {
+        if self.can_draw {
+            if pacman.powered_up {
+                draw_circle(self.position.x, self.position.y, self.size, LIGHTGRAY);
+            } else {
+                draw_circle(self.position.x, self.position.y, self.size, color);
+            }
+        }
+    }
+
 }

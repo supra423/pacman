@@ -1,7 +1,6 @@
 use crate::constants::*;
 use crate::game_objects::*;
 use crate::map_operations::*;
-use macroquad::input;
 use macroquad::prelude::*;
 use std::time::{Duration, Instant};
 
@@ -31,7 +30,7 @@ pub async fn run() {
     loop {
         let start = Instant::now();
         if timer == 2 {
-            std::thread::sleep(std::time::Duration::from_secs(3)); // reading this line is funny
+            std::thread::sleep(Duration::from_secs(3)); // reading this line is funny
         } else {
             if load_food(game_map).is_empty() {
                 pacman.reset_values();
@@ -104,46 +103,22 @@ pub async fn run() {
             clyde.move_character(clyde.direction);
 
             // collision detection
-            pacman.is_colliding(game_map);
+            pacman.colliding(game_map);
 
             blinky.change_direction(game_map);
 
             // checks if character goes through tunnel, character goes right out of the other side
-            pacman.go_to_other_side();
 
-            blinky.go_to_other_side();
-            inky.go_to_other_side();
-            pinky.go_to_other_side();
-            clyde.go_to_other_side();
+            pacman.position.x = Entity::PacMan(&pacman).go_to_other_side();
+            blinky.position.x = Entity::Ghost(&blinky).go_to_other_side();
+            inky.position.x = Entity::Ghost(&inky).go_to_other_side();
+            pinky.position.x = Entity::Ghost(&pinky).go_to_other_side();
+            clyde.position.x = Entity::Ghost(&clyde).go_to_other_side();
 
-            if blinky.can_draw {
-                if pacman.powered_up {
-                    draw_circle(blinky.position.x, blinky.position.y, blinky.size, LIGHTGRAY);
-                } else {
-                    draw_circle(blinky.position.x, blinky.position.y, blinky.size, RED);
-                }
-            }
-            if inky.can_draw {
-                if pacman.powered_up {
-                    draw_circle(inky.position.x, inky.position.y, blinky.size, LIGHTGRAY);
-                } else {
-                    draw_circle(inky.position.x, inky.position.y, blinky.size, BLUE);
-                }
-            }
-            if pinky.can_draw {
-                if pacman.powered_up {
-                    draw_circle(pinky.position.x, pinky.position.y, blinky.size, LIGHTGRAY);
-                } else {
-                    draw_circle(pinky.position.x, pinky.position.y, blinky.size, PINK);
-                }
-            }
-            if clyde.can_draw {
-                if pacman.powered_up {
-                    draw_circle(clyde.position.x, clyde.position.y, blinky.size, LIGHTGRAY);
-                } else {
-                    draw_circle(clyde.position.x, clyde.position.y, blinky.size, ORANGE);
-                }
-            }
+            blinky.draw_color_switch(&pacman, RED);
+            inky.draw_color_switch(&pacman, BLUE);
+            pinky.draw_color_switch(&pacman, PINK);
+            clyde.draw_color_switch(&pacman, ORANGE);
 
             // println!("{:?}", convert_pos_to_index(&pacman.position));
 
