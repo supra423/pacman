@@ -176,8 +176,19 @@ pub fn amount_of_moves_available(
             possible_directions.push(direction);
         }
     }
-    // println!("{}", possible_directions.len());
     possible_directions.len()
+}
+
+pub fn display_level(mut level: u8) {
+    let level_text = level.to_string();
+    let formatted_level = format!("LEVEL: {level_text}");
+    draw_text(
+        &formatted_level,
+        BOARD_BOTTOM_RIGHT_COORDS.x - 120.0,
+        35.0,
+        30.0,
+        WHITE,
+    );
 }
 
 // pub fn timer_function(timer: u32, time_in_seconds: u32) -> bool {

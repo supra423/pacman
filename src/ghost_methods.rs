@@ -39,8 +39,12 @@ impl Ghost {
     }
     pub fn reset_values(&mut self) {
         self.direction = vec2(0.0, 0.0);
-        self.position = vec2(CENTER.x, CENTER.y - 128.0);
+        self.position = vec2(CENTER.x, CENTER.y - 32.0);
         self.can_draw = false;
+    }
+
+    pub fn teleport_outside_pen(&mut self) {
+        self.position = vec2(CENTER.x, CENTER.y - 128.0)
     }
     pub fn draw_delay(&mut self, timer: u32, frame: u32, map: [[u8; COLS]; ROWS]) {
         if timer >= frame {
@@ -48,7 +52,7 @@ impl Ghost {
             self.can_draw = true;
         }
         if timer == frame - 1 || timer == frame {
-            self.position = vec2(CENTER.x, CENTER.y - 128.0);
+            self.teleport_outside_pen();
             self.direction = vec2(0.0, -1.0);
         }
     }
@@ -61,5 +65,4 @@ impl Ghost {
             }
         }
     }
-
 }

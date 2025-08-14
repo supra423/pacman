@@ -16,7 +16,7 @@ pub struct PacMan {
     pub speed: f32,
     pub powered_up: bool,
     pub colliding: bool,
-    pub power_up_timer: u32,
+    pub power_up_timer: u16,
     pub score: u32,
     pub lives: u8,
 }

@@ -17,6 +17,7 @@ pub async fn run() {
 
     // for frame limiting
     let frame_duration = Duration::from_secs_f64(FRAME_TIME as f64);
+    let mut game_level = 1;
 
     // defining the entities, their initial positions, and speed
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
@@ -27,17 +28,29 @@ pub async fn run() {
     let mut pinky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
     let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
 
+    let mut pacman_power_duration: u16 = 360;
+
     loop {
         let start = Instant::now();
         if timer == 2 {
             std::thread::sleep(Duration::from_secs(3)); // reading this line is funny
         } else {
             if load_food(game_map).is_empty() {
+                game_level += 1;
                 pacman.reset_values();
                 blinky.reset_values();
                 inky.reset_values();
                 pinky.reset_values();
                 clyde.reset_values();
+                if blinky.speed < 420.0 {
+                    blinky.speed += 30.0;
+                    inky.speed += 30.0;
+                    pinky.speed += 30.0;
+                    clyde.speed += 30.0;
+                }
+                if pacman_power_duration > 60 {
+                    pacman_power_duration -= 60;
+                }
                 game_map = RAW_MAP;
                 timer = 0;
             }
@@ -62,15 +75,15 @@ pub async fn run() {
                 }
             } else {
                 pacman.power_up_timer += 1;
-                if pacman.power_up_timer <= 360 {
+                if pacman.power_up_timer <= pacman_power_duration {
                     if pacman.aabb(&blinky) {
-                        blinky.reset_values();
+                        blinky.teleport_outside_pen();
                     } else if pacman.aabb(&inky) {
-                        inky.reset_values();
+                        inky.teleport_outside_pen();
                     } else if pacman.aabb(&pinky) {
-                        pinky.reset_values();
+                        pinky.teleport_outside_pen();
                     } else if pacman.aabb(&clyde) {
-                        clyde.reset_values();
+                        clyde.teleport_outside_pen();
                     }
                 } else {
                     pacman.powered_up = false;
@@ -78,6 +91,7 @@ pub async fn run() {
                 }
             }
 
+            display_level(game_level);
             // if timer % 60 == 0 {
             // println!("{}", timer / 60);
             // }
@@ -131,7 +145,6 @@ pub async fn run() {
             );
             // amount_of_moves_available(pacman.position, pacman.direction, game_map);
 
-            pacman.debug_texts();
             pacman.draw_score();
             pacman.draw_lives();
             game_map = pacman.food_eat(game_map);

@@ -154,13 +154,13 @@ impl PacMan {
     pub fn draw_score(&self) {
         let score_text = &self.score.to_string();
         let formatted_score = format!("SCORE: {score_text}");
-        draw_text(&formatted_score, 200.0, 35.0, 30.0, WHITE);
+        draw_text(&formatted_score, BOARD_TOP_LEFT_COORDS.x, 35.0, 30.0, WHITE);
     }
 
     pub fn draw_lives(&self) {
         let lives_text = &self.lives.to_string();
         let formatted_score = format!("LIVES: {lives_text}");
-        draw_text(&formatted_score, 50.0, 100.0, 30.0, WHITE);
+        draw_text(&formatted_score, CENTER.x - 50.0, 35.0, 30.0, WHITE);
     }
 
     pub fn debug_texts(&self) {
