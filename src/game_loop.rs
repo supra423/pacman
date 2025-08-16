@@ -119,8 +119,6 @@ pub async fn run() {
             // collision detection
             pacman.colliding(game_map);
 
-            blinky.change_direction(game_map);
-
             // checks if character goes through tunnel, character goes right out of the other side
 
             pacman.position.x = Entity::PacMan(&pacman).go_to_other_side();

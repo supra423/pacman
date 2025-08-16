@@ -101,42 +101,10 @@ pub fn frightened_mode(position: Vec2, current_direction: Vec2, map: [[u8; COLS]
     }
 }
 
-// pub fn choose_ghost_mode(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
-//     if ghost.frightened_mode {
-//         update_frightened_position(ghost, map)
-//     } else {
-//         update_frightened_position(ghost, map)
-//     }
-// }
-
-pub fn fetch_all_moves(
-    position: Vec2,
-    current_direction: Vec2,
-    map: [[u8; COLS]; ROWS],
-) -> Vec<Vec2> {
-    let mut possible_directions = Vec::new();
-    let all_directions = [
-        vec2(1.0, 0.0),
-        vec2(-1.0, 0.0),
-        vec2(0.0, 1.0),
-        vec2(0.0, -1.0),
-    ];
-
-    for direction in all_directions {
-        if direction != -current_direction
-            // && direction != current_direction
-            && can_move_to_direction(centered_coordinates(position), direction, map)
-        {
-            possible_directions.push(direction);
-        }
-    }
-    possible_directions
-}
-
 pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
     // if Entity::Ghost(&ghost).collision_checking_offset(map) {
-    if (Entity::Ghost(&ghost).collision_checking_offset(map)
-        || amount_of_moves_available(ghost.position, ghost.direction, map) > 1)
+    let possible_directions = fetch_all_moves(ghost.position, ghost.direction, map);
+    if (Entity::Ghost(&ghost).collision_checking_offset(map) || possible_directions.len() > 1)
         && ghost.can_change_direction
     {
         let new_direction =
@@ -155,11 +123,11 @@ pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Ve
     }
 }
 
-pub fn amount_of_moves_available(
+pub fn fetch_all_moves(
     position: Vec2,
     current_direction: Vec2,
     map: [[u8; COLS]; ROWS],
-) -> usize {
+) -> Vec<Vec2> {
     let mut possible_directions = Vec::new();
     let all_directions = [
         vec2(1.0, 0.0),
@@ -176,10 +144,10 @@ pub fn amount_of_moves_available(
             possible_directions.push(direction);
         }
     }
-    possible_directions.len()
+    possible_directions
 }
 
-pub fn display_level(mut level: u8) {
+pub fn display_level(level: u8) {
     let level_text = level.to_string();
     let formatted_level = format!("LEVEL: {level_text}");
     draw_text(
@@ -189,10 +157,3 @@ pub fn display_level(mut level: u8) {
         30.0,
         WHITE,
     );
-}
-
-// pub fn timer_function(timer: u32, time_in_seconds: u32) -> bool {
-//     let time = time_in_seconds * 60;
-//     // time > timer
-//     timer >= time
-// }
