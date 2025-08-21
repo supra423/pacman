@@ -19,6 +19,8 @@ pub const FPS: f32 = 60.0;
 pub const FRAME_TIME: f32 = 1.0 / FPS;
 pub const PI: f32 = std::f32::consts::PI;
 
+pub const MAX_GHOST_SPEED: f32 = 420.0;
+
 pub const COLS: usize = 28;
 pub const ROWS: usize = 31;
 pub const RAW_MAP: [[u8; COLS]; ROWS] = [

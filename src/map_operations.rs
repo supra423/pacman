@@ -138,7 +138,7 @@ pub fn fetch_all_moves(
 
     for direction in all_directions {
         if direction != -current_direction
-            && direction != current_direction
+            // && direction != current_direction
             && can_move_to_direction(centered_coordinates(position), direction, map)
         {
             possible_directions.push(direction);
@@ -157,3 +157,4 @@ pub fn display_level(level: u8) {
         30.0,
         WHITE,
     );
+}

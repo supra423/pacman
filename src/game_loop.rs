@@ -31,10 +31,10 @@ pub async fn run() {
     let mut pacman_power_duration: u16 = 360;
 
     loop {
-        let start = Instant::now();
         if timer == 2 {
             std::thread::sleep(Duration::from_secs(3)); // reading this line is funny
         } else {
+            let start = Instant::now();
             if load_food(game_map).is_empty() {
                 game_level += 1;
                 pacman.reset_values();
@@ -42,7 +42,8 @@ pub async fn run() {
                 inky.reset_values();
                 pinky.reset_values();
                 clyde.reset_values();
-                if blinky.speed < 420.0 {
+
+                if blinky.speed < MAX_GHOST_SPEED {
                     blinky.speed += 30.0;
                     inky.speed += 30.0;
                     pinky.speed += 30.0;
