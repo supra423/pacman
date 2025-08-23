@@ -29,136 +29,198 @@ pub async fn run() {
     let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
 
     let mut pacman_power_duration: u16 = 360;
+    loop {
+        display_level(game_level);
+        pacman.draw_score();
+        pacman.draw_lives();
+        draw_elements(game_map, &map_image);
+        draw_text(
+            "Move to start!",
+            CENTER.x - 80.0,
+            CENTER.y + 535.0,
+            30.0,
+            WHITE,
+        );
+        draw_text(
+            "WASD OR Arrow for controls!",
+            CENTER.x - 145.0,
+            CENTER.y + 75.0,
+            25.0,
+            WHITE,
+        );
+
+        pacman.draw(
+            &pacman_open,
+            &pacman_close,
+            &pacman_half,
+            timer,
+            pacman.colliding,
+        );
+        next_frame().await;
+        if let Some(_) = handle_controls() {
+            break;
+        }
+    }
 
     loop {
-        if timer == 2 {
-            std::thread::sleep(Duration::from_secs(3)); // reading this line is funny
-        } else {
-            let start = Instant::now();
-            if load_food(game_map).is_empty() {
-                game_level += 1;
-                pacman.reset_values();
-                blinky.reset_values();
-                inky.reset_values();
-                pinky.reset_values();
-                clyde.reset_values();
-
-                if blinky.speed < MAX_GHOST_SPEED {
-                    blinky.speed += 30.0;
-                    inky.speed += 30.0;
-                    pinky.speed += 30.0;
-                    clyde.speed += 30.0;
-                }
-                if pacman_power_duration > 60 {
-                    pacman_power_duration -= 60;
-                }
-                game_map = RAW_MAP;
-                timer = 0;
+        let start = Instant::now();
+        if load_food(game_map).is_empty() {
+            game_level += 1;
+            pacman.reset_values();
+            blinky.reset_values();
+            inky.reset_values();
+            pinky.reset_values();
+            clyde.reset_values();
+            if blinky.speed < MAX_GHOST_SPEED {
+                blinky.speed += 30.0;
+                inky.speed += 30.0;
+                pinky.speed += 30.0;
+                clyde.speed += 30.0;
             }
-            if !pacman.powered_up {
-                if pacman.aabb(&blinky)
-                    || pacman.aabb(&inky)
-                    || pacman.aabb(&pinky)
-                    || pacman.aabb(&clyde)
-                {
-                    if pacman.lives > 0 {
-                        pacman.lives -= 1;
+            if pacman_power_duration > 60 {
+                pacman_power_duration -= 60;
+            }
+            game_map = RAW_MAP;
+            timer = 0;
 
-                        pacman.reset_values();
-                        blinky.reset_values();
-                        inky.reset_values();
-                        pinky.reset_values();
-                        clyde.reset_values();
-                        timer = 0;
-                    } else {
-                        return;
-                    }
+            loop {
+                display_level(game_level);
+                pacman.draw_score();
+                pacman.draw_lives();
+                draw_elements(game_map, &map_image);
+                pacman.draw(
+                    &pacman_open,
+                    &pacman_close,
+                    &pacman_half,
+                    timer,
+                    pacman.colliding,
+                );
+                if let Some(_) = handle_controls() {
+                    break;
                 }
-            } else {
-                pacman.power_up_timer += 1;
-                if pacman.power_up_timer <= pacman_power_duration {
-                    if pacman.aabb(&blinky) {
-                        blinky.teleport_outside_pen();
-                    } else if pacman.aabb(&inky) {
-                        inky.teleport_outside_pen();
-                    } else if pacman.aabb(&pinky) {
-                        pinky.teleport_outside_pen();
-                    } else if pacman.aabb(&clyde) {
-                        clyde.teleport_outside_pen();
+                next_frame().await;
+            }
+        }
+        if !pacman.powered_up {
+            if pacman.aabb(&blinky)
+                || pacman.aabb(&inky)
+                || pacman.aabb(&pinky)
+                || pacman.aabb(&clyde)
+            {
+                if pacman.lives > 0 {
+                    pacman.lives -= 1;
+                    pacman.reset_values();
+                    blinky.reset_values();
+                    inky.reset_values();
+                    pinky.reset_values();
+                    clyde.reset_values();
+                    timer = 0;
+                    loop {
+                        display_level(game_level);
+                        pacman.draw_score();
+                        pacman.draw_lives();
+                        draw_elements(game_map, &map_image);
+                        pacman.draw(
+                            &pacman_open,
+                            &pacman_close,
+                            &pacman_half,
+                            timer,
+                            pacman.colliding,
+                        );
+                        next_frame().await;
+                        if let Some(_) = handle_controls() {
+                            break;
+                        }
                     }
                 } else {
-                    pacman.powered_up = false;
-                    pacman.power_up_timer = 0;
+                    return;
                 }
             }
-
-            display_level(game_level);
-            // if timer % 60 == 0 {
-            // println!("{}", timer / 60);
-            // }
-            blinky.draw_delay(timer, 2, game_map);
-            inky.draw_delay(timer, 300, game_map);
-            pinky.draw_delay(timer, 600, game_map);
-            clyde.draw_delay(timer, 900, game_map);
-
-            draw_elements(game_map, &map_image);
-
-            if let Some(direction) = handle_controls() {
-                pacman.next_direction = direction;
+        } else {
+            pacman.power_up_timer += 1;
+            if pacman.power_up_timer <= pacman_power_duration {
+                if pacman.aabb(&blinky) {
+                    blinky.teleport_outside_pen();
+                } else if pacman.aabb(&inky) {
+                    inky.teleport_outside_pen();
+                } else if pacman.aabb(&pinky) {
+                    pinky.teleport_outside_pen();
+                } else if pacman.aabb(&clyde) {
+                    clyde.teleport_outside_pen();
+                }
+            } else {
+                pacman.powered_up = false;
+                pacman.power_up_timer = 0;
             }
-
-            pacman.change_directions(game_map);
-
-            // position calculation
-            pacman.move_character(pacman.direction);
-
-            blinky.move_character(blinky.direction);
-            inky.move_character(inky.direction);
-            pinky.move_character(pinky.direction);
-            clyde.move_character(clyde.direction);
-
-            // collision detection
-            pacman.colliding(game_map);
-
-            // checks if character goes through tunnel, character goes right out of the other side
-
-            pacman.position.x = Entity::PacMan(&pacman).go_to_other_side();
-            blinky.position.x = Entity::Ghost(&blinky).go_to_other_side();
-            inky.position.x = Entity::Ghost(&inky).go_to_other_side();
-            pinky.position.x = Entity::Ghost(&pinky).go_to_other_side();
-            clyde.position.x = Entity::Ghost(&clyde).go_to_other_side();
-
-            blinky.draw_color_switch(&pacman, RED);
-            inky.draw_color_switch(&pacman, BLUE);
-            pinky.draw_color_switch(&pacman, PINK);
-            clyde.draw_color_switch(&pacman, ORANGE);
-
-            // println!("{:?}", convert_pos_to_index(&pacman.position));
-
-            pacman.draw(
-                &pacman_open,
-                &pacman_close,
-                &pacman_half,
-                timer,
-                pacman.colliding,
-            );
-            // amount_of_moves_available(pacman.position, pacman.direction, game_map);
-
-            pacman.draw_score();
-            pacman.draw_lives();
-            game_map = pacman.food_eat(game_map);
-            if timer == u32::MAX {
-                // reset timer if it exceeds
-                timer = 0;
-            }
-            // keeping this for debugging some stuff
-            // std::thread::sleep(std::time::Duration::from_millis(30));
-            let elapsed = start.elapsed();
-            if elapsed < frame_duration {
-                std::thread::sleep(frame_duration - elapsed);
-            }
-            next_frame().await;
         }
+
+        // if timer % 60 == 0 {
+        // println!("{}", timer / 60);
+        // }
+        blinky.draw_delay(timer, 2, game_map);
+        inky.draw_delay(timer, 300, game_map);
+        pinky.draw_delay(timer, 600, game_map);
+        clyde.draw_delay(timer, 900, game_map);
+
+        draw_elements(game_map, &map_image);
+
+        if let Some(direction) = handle_controls() {
+            pacman.next_direction = direction;
+        }
+
+        pacman.change_directions(game_map);
+
+        // position calculation
+        pacman.move_character(pacman.direction);
+
+        blinky.move_character(blinky.direction);
+        inky.move_character(inky.direction);
+        pinky.move_character(pinky.direction);
+        clyde.move_character(clyde.direction);
+
+        // collision detection
+        pacman.colliding(game_map);
+
+        // checks if character goes through tunnel, character goes right out of the other side
+
+        pacman.position.x = Entity::PacMan(&pacman).go_to_other_side();
+        blinky.position.x = Entity::Ghost(&blinky).go_to_other_side();
+        inky.position.x = Entity::Ghost(&inky).go_to_other_side();
+        pinky.position.x = Entity::Ghost(&pinky).go_to_other_side();
+        clyde.position.x = Entity::Ghost(&clyde).go_to_other_side();
+
+        blinky.draw_color_switch(&pacman, RED);
+        inky.draw_color_switch(&pacman, BLUE);
+        pinky.draw_color_switch(&pacman, PINK);
+        clyde.draw_color_switch(&pacman, ORANGE);
+
+        // println!("{:?}", convert_pos_to_index(&pacman.position));
+
+        pacman.draw(
+            &pacman_open,
+            &pacman_close,
+            &pacman_half,
+            timer,
+            pacman.colliding,
+        );
+        // amount_of_moves_available(pacman.position, pacman.direction, game_map);
+
+        display_level(game_level);
+        pacman.draw_score();
+        pacman.draw_lives();
+        game_map = pacman.food_eat(game_map);
+        if timer == u32::MAX {
+            // reset timer if it exceeds
+            timer = 0;
+        }
+        // keeping this for debugging some stuff
+        // std::thread::sleep(std::time::Duration::from_millis(30));
+        let elapsed = start.elapsed();
+        if elapsed < frame_duration {
+            std::thread::sleep(frame_duration - elapsed);
+        }
+        next_frame().await;
+        // }
         timer += 1;
     }
 }
