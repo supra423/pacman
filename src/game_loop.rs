@@ -11,7 +11,6 @@ pub async fn run() {
     let pacman_half: Texture2D = load_texture("assets/pacman_half.png").await.unwrap();
 
     let mut game_map = RAW_MAP;
-    let ptr_game_map: *mut [[u8; COLS]; ROWS] = &mut game_map;
 
     let mut timer: u32 = 0;
 
@@ -31,14 +30,14 @@ pub async fn run() {
     game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
     loop {
         let start = Instant::now();
-        if load_food(game_map).is_empty() {
+        if load_food(&game_map).is_empty() {
             game_level += 1;
             pacman.reset_values();
             blinky.reset_values();
             inky.reset_values();
             pinky.reset_values();
             clyde.reset_values();
-            if blinky.speed < MAX_GHOST_SPEED {
+            if blinky.speed <= MAX_GHOST_SPEED {
                 blinky.speed += 30.0;
                 inky.speed += 30.0;
                 pinky.speed += 30.0;
@@ -136,7 +135,8 @@ pub async fn run() {
         display_level(game_level);
         pacman.draw_score();
         pacman.draw_lives();
-        pacman.food_eat(ptr_game_map);
+        pacman.food_eat(&mut game_map);
+
         if timer == u32::MAX {
             // reset timer if it exceeds
             timer = 0;

@@ -1,9 +1,8 @@
 use crate::constants::*;
 use crate::game_objects::*;
-use crate::pacman_methods;
 use macroquad::prelude::*;
 
-pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
+pub fn load_food(map: &[[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
     let mut map_food = Vec::new();
     for i in 0..ROWS {
         for j in 0..COLS {
@@ -42,7 +41,7 @@ pub fn draw_elements(map: [[u8; COLS]; ROWS], map_image: &Texture2D) {
             ..Default::default()
         },
     );
-    let foods = load_food(map);
+    let foods = load_food(&map);
     for food in &foods {
         draw_poly(food.position.y, food.position.x, 4, food.size, 45.0, WHITE);
     }

@@ -104,20 +104,20 @@ impl PacMan {
             );
         }
     }
-    pub fn food_eat(&mut self, map: *mut [[u8; COLS]; ROWS]) -> [[u8; COLS]; ROWS] {
+    pub fn food_eat(&mut self, map: &mut [[u8; COLS]; ROWS]) {
         let (row, col) = convert_pos_to_index(&self.position);
-        unsafe {
-            if (*map)[col][row] == 2 {
+        match map[col][row] {
+            2 => {
                 self.score += 10;
-                (*map)[col][row] = 0;
+                map[col][row] = 0;
             }
-            if (*map)[col][row] == 3 {
+            3 => {
                 self.score += 50;
                 self.powered_up = true;
                 self.power_up_timer = 0;
-                (*map)[col][row] = 0;
+                map[col][row] = 0;
             }
-            *map
+            _ => {}
         }
     }
     pub fn aabb(&self, ghost: &Ghost) -> bool {
