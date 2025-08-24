@@ -14,9 +14,6 @@ impl Ghost {
             direction: vec2(0.0, 0.0),
             speed,
             can_change_direction: true,
-            // frightened_mode: true,
-            // scatter_mode: false,
-            // chase_mode: false,
             respawn_mode: false,
         }
     }

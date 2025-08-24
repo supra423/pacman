@@ -103,7 +103,6 @@ pub fn frightened_mode(position: Vec2, current_direction: Vec2, map: [[u8; COLS]
 }
 
 pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Vec2, Vec2) {
-    // if Entity::Ghost(&ghost).collision_checking_offset(map) {
     let possible_directions = fetch_all_moves(ghost.position, ghost.direction, map);
     if (Entity::Ghost(&ghost).collision_checking_offset(map) || possible_directions.len() > 1)
         && ghost.can_change_direction
@@ -117,7 +116,6 @@ pub fn update_frightened_position(ghost: &Ghost, map: [[u8; COLS]; ROWS]) -> (Ve
             new_position = centered_coordinates(ghost.position);
         }
 
-        // let new_position = ghost.position;
         (new_position, new_direction)
     } else {
         (ghost.position, ghost.direction)
@@ -139,7 +137,6 @@ pub fn fetch_all_moves(
 
     for direction in all_directions {
         if direction != -current_direction
-            // && direction != current_direction
             && can_move_to_direction(centered_coordinates(position), direction, map)
         {
             possible_directions.push(direction);
@@ -167,9 +164,6 @@ pub async fn game_loop_pause(
     pacman_close: &Texture2D,
 ) {
     loop {
-        // these other loops are basically the pause before
-        // the player makes a move. I can't seem to figure out
-        // how to make a function for this
         display_level(game_level);
         pacman.draw_score();
         pacman.draw_lives();
@@ -189,7 +183,6 @@ pub async fn game_loop_pause(
             WHITE,
         );
 
-        // draw_texture(pacman_close, pacman.position.x, pacman.position.y, WHITE);
         draw_texture_ex(
             pacman_close,
             pacman.position.x - 27.5,

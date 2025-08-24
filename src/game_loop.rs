@@ -11,8 +11,8 @@ pub async fn run() {
     let pacman_half: Texture2D = load_texture("assets/pacman_half.png").await.unwrap();
 
     let mut game_map = RAW_MAP;
+    let ptr_game_map: *mut [[u8; COLS]; ROWS] = &mut game_map;
 
-    // for animations and switching between modes of ghosts
     let mut timer: u32 = 0;
 
     // for frame limiting
@@ -21,7 +21,6 @@ pub async fn run() {
 
     // defining the entities, their initial positions, and speed
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
-    // self.position = vec2(CENTER.x, CENTER.y - 32.0);
 
     let mut blinky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
     let mut inky = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
@@ -31,7 +30,6 @@ pub async fn run() {
     let mut pacman_power_duration: u16 = 360;
     game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
     loop {
-        // main loop
         let start = Instant::now();
         if load_food(game_map).is_empty() {
             game_level += 1;
@@ -107,7 +105,6 @@ pub async fn run() {
 
         pacman.change_directions(game_map);
 
-        // position calculation
         pacman.move_character(pacman.direction);
 
         blinky.move_character(blinky.direction);
@@ -115,10 +112,7 @@ pub async fn run() {
         pinky.move_character(pinky.direction);
         clyde.move_character(clyde.direction);
 
-        // collision detection
         pacman.colliding(game_map);
-
-        // checks if character goes through tunnel, character goes right out of the other side
 
         pacman.position.x = Entity::PacMan(&pacman).go_to_other_side();
         blinky.position.x = Entity::Ghost(&blinky).go_to_other_side();
@@ -131,8 +125,6 @@ pub async fn run() {
         pinky.draw_color_switch(&pacman, PINK);
         clyde.draw_color_switch(&pacman, ORANGE);
 
-        // println!("{:?}", convert_pos_to_index(&pacman.position));
-
         pacman.draw(
             &pacman_open,
             &pacman_close,
@@ -140,12 +132,11 @@ pub async fn run() {
             timer,
             pacman.colliding,
         );
-        // amount_of_moves_available(pacman.position, pacman.direction, game_map);
 
         display_level(game_level);
         pacman.draw_score();
         pacman.draw_lives();
-        game_map = pacman.food_eat(game_map);
+        pacman.food_eat(ptr_game_map);
         if timer == u32::MAX {
             // reset timer if it exceeds
             timer = 0;
@@ -157,7 +148,6 @@ pub async fn run() {
             std::thread::sleep(frame_duration - elapsed);
         }
         next_frame().await;
-        // }
         timer += 1;
     }
 }
