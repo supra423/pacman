@@ -1,5 +1,6 @@
 use crate::constants::*;
 use crate::game_objects::*;
+use crate::pacman_methods;
 use macroquad::prelude::*;
 
 pub fn load_food(map: [[u8; COLS]; ROWS]) -> Vec<FoodPellet> {
@@ -157,4 +158,51 @@ pub fn display_level(level: u8) {
         30.0,
         WHITE,
     );
+}
+pub async fn game_loop_pause(
+    game_level: u8,
+    pacman: &PacMan,
+    map: [[u8; COLS]; ROWS],
+    map_image: &Texture2D,
+    pacman_close: &Texture2D,
+) {
+    loop {
+        // these other loops are basically the pause before
+        // the player makes a move. I can't seem to figure out
+        // how to make a function for this
+        display_level(game_level);
+        pacman.draw_score();
+        pacman.draw_lives();
+        draw_elements(map, &map_image);
+        draw_text(
+            "Move to start!",
+            CENTER.x - 85.0,
+            CENTER.y + 535.0,
+            30.0,
+            WHITE,
+        );
+        draw_text(
+            "WASD OR Arrow for controls!",
+            CENTER.x - 145.0,
+            CENTER.y + 75.0,
+            25.0,
+            WHITE,
+        );
+
+        // draw_texture(pacman_close, pacman.position.x, pacman.position.y, WHITE);
+        draw_texture_ex(
+            pacman_close,
+            pacman.position.x - 27.5,
+            pacman.position.y - 27.5,
+            WHITE,
+            DrawTextureParams {
+                dest_size: Some(vec2(55.0, 55.0)),
+                ..Default::default()
+            },
+        );
+        next_frame().await;
+        if let Some(_) = handle_controls() {
+            break;
+        }
+    }
 }

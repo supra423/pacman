@@ -17,7 +17,7 @@ pub async fn run() {
 
     // for frame limiting
     let frame_duration = Duration::from_secs_f64(FRAME_TIME as f64);
-    let mut game_level = 1;
+    let mut game_level: u8 = 1;
 
     // defining the entities, their initial positions, and speed
     let mut pacman = PacMan::new(vec2(CENTER.x, CENTER.y + 256.0), 300.0);
@@ -29,40 +29,9 @@ pub async fn run() {
     let mut clyde = Ghost::new(vec2(CENTER.x, CENTER.y - 32.0), 300.0);
 
     let mut pacman_power_duration: u16 = 360;
+    game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
     loop {
-        display_level(game_level);
-        pacman.draw_score();
-        pacman.draw_lives();
-        draw_elements(game_map, &map_image);
-        draw_text(
-            "Move to start!",
-            CENTER.x - 80.0,
-            CENTER.y + 535.0,
-            30.0,
-            WHITE,
-        );
-        draw_text(
-            "WASD OR Arrow for controls!",
-            CENTER.x - 145.0,
-            CENTER.y + 75.0,
-            25.0,
-            WHITE,
-        );
-
-        pacman.draw(
-            &pacman_open,
-            &pacman_close,
-            &pacman_half,
-            timer,
-            pacman.colliding,
-        );
-        next_frame().await;
-        if let Some(_) = handle_controls() {
-            break;
-        }
-    }
-
-    loop {
+        // main loop
         let start = Instant::now();
         if load_food(game_map).is_empty() {
             game_level += 1;
@@ -83,23 +52,7 @@ pub async fn run() {
             game_map = RAW_MAP;
             timer = 0;
 
-            loop {
-                display_level(game_level);
-                pacman.draw_score();
-                pacman.draw_lives();
-                draw_elements(game_map, &map_image);
-                pacman.draw(
-                    &pacman_open,
-                    &pacman_close,
-                    &pacman_half,
-                    timer,
-                    pacman.colliding,
-                );
-                if let Some(_) = handle_controls() {
-                    break;
-                }
-                next_frame().await;
-            }
+            game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
         }
         if !pacman.powered_up {
             if pacman.aabb(&blinky)
@@ -115,23 +68,7 @@ pub async fn run() {
                     pinky.reset_values();
                     clyde.reset_values();
                     timer = 0;
-                    loop {
-                        display_level(game_level);
-                        pacman.draw_score();
-                        pacman.draw_lives();
-                        draw_elements(game_map, &map_image);
-                        pacman.draw(
-                            &pacman_open,
-                            &pacman_close,
-                            &pacman_half,
-                            timer,
-                            pacman.colliding,
-                        );
-                        next_frame().await;
-                        if let Some(_) = handle_controls() {
-                            break;
-                        }
-                    }
+                    game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
                 } else {
                     return;
                 }
