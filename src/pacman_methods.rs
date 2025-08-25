@@ -9,7 +9,6 @@ impl PacMan {
         Self {
             position,
             pos_in_grid: convert_pos_to_index(&position),
-            // size: TILE_SIZE,
             direction: Vec2::ZERO,
             next_direction: Vec2::ZERO,
             speed,
@@ -129,7 +128,6 @@ impl PacMan {
 
         a_min.x < b_max.x && a_max.x > b_min.x && a_min.y < b_max.y && a_max.y > b_min.y
     }
-
     pub fn reset_values(&mut self) {
         self.powered_up = false;
         self.direction = vec2(0.0, 0.0);
@@ -143,7 +141,6 @@ impl PacMan {
             }
         }
     }
-
     pub fn colliding(&mut self, map: [[u8; COLS]; ROWS]) {
         self.colliding = false;
         if Entity::PacMan(&self).collision_checking_offset(map) {
@@ -164,19 +161,19 @@ impl PacMan {
         draw_text(&formatted_score, CENTER.x - 50.0, 35.0, 30.0, WHITE);
     }
 
-    pub fn debug_texts(&self) {
-        let pacman_pos_string = &self.position.to_string();
-        let (row, col) = convert_pos_to_index(&self.position);
-        let col_string = &col.to_string();
-        let row_string = &row.to_string();
-
-        if self.colliding {
-            let collision_text = "COLLIDING";
-            draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
-        }
-
-        draw_text(pacman_pos_string, 50.0, 35.0, 15.0, YELLOW);
-        draw_text(row_string, 50.0, 50.0, 15.0, YELLOW);
-        draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
-    }
+    // pub fn debug_texts(&self) {
+    //     let pacman_pos_string = &self.position.to_string();
+    //     let (row, col) = convert_pos_to_index(&self.position);
+    //     let col_string = &col.to_string();
+    //     let row_string = &row.to_string();
+    //
+    //     if self.colliding {
+    //         let collision_text = "COLLIDING";
+    //         draw_text(&collision_text, 50.0, 25.0, 15.0, YELLOW);
+    //     }
+    //
+    //     draw_text(pacman_pos_string, 50.0, 35.0, 15.0, YELLOW);
+    //     draw_text(row_string, 50.0, 50.0, 15.0, YELLOW);
+    //     draw_text(col_string, 50.0, 65.0, 15.0, YELLOW);
+    // }
 }

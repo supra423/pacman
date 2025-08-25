@@ -14,7 +14,7 @@ impl Ghost {
             direction: vec2(0.0, 0.0),
             speed,
             can_change_direction: true,
-            respawn_mode: false,
+            // respawn_mode: false,
         }
     }
     pub fn move_character(&mut self, direction: Vec2) {

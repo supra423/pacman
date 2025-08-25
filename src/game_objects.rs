@@ -33,7 +33,7 @@ pub struct Ghost {
     // pub frightened_mode: bool,
     // pub scatter_mode: bool,
     // pub chase_mode: bool,
-    pub respawn_mode: bool,
+    // pub respawn_mode: bool,
 }
 
 pub enum Entity<'a> {
