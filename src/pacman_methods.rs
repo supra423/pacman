@@ -119,14 +119,16 @@ impl PacMan {
             _ => {}
         }
     }
-    pub fn aabb(&self, ghost: &Ghost) -> bool {
+    pub fn aabb(&self, ghost: (f32, f32)) -> bool {
         let a_min = self.position - Vec2::splat(TILE_SIZE / 2.0);
         let a_max = self.position + Vec2::splat(TILE_SIZE / 2.0);
 
-        let b_min = ghost.position - Vec2::splat(TILE_SIZE / 2.0);
-        let b_max = ghost.position + Vec2::splat(TILE_SIZE / 2.0);
+        let b_min_x = ghost.0 - (TILE_SIZE / 2.0);
+        let b_min_y = ghost.1 - (TILE_SIZE / 2.0);
+        let b_max_x = ghost.0 + (TILE_SIZE / 2.0);
+        let b_max_y = ghost.1 + (TILE_SIZE / 2.0);
 
-        a_min.x < b_max.x && a_max.x > b_min.x && a_min.y < b_max.y && a_max.y > b_min.y
+        a_min.x < b_max_x && a_max.x > b_min_x && a_min.y < b_max_y && a_max.y > b_min_y
     }
     pub fn reset_values(&mut self) {
         self.powered_up = false;

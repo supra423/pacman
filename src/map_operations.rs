@@ -198,3 +198,6 @@ pub async fn game_loop_pause(
         }
     }
 }
+pub fn is_game_won(map: &[[u8; COLS]; ROWS]) -> bool {
+    load_food(map).is_empty()
+}

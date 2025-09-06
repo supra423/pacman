@@ -30,7 +30,13 @@ pub async fn run() {
     game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
     loop {
         let start = Instant::now();
-        if load_food(&game_map).is_empty() {
+        let ghost_coords = (
+            (blinky.position.x, blinky.position.y),
+            (inky.position.x, inky.position.y),
+            (pinky.position.x, pinky.position.y),
+            (clyde.position.x, clyde.position.y),
+        );
+        if is_game_won(&game_map) {
             game_level += 1;
             pacman.reset_values();
             blinky.reset_values();
@@ -52,10 +58,10 @@ pub async fn run() {
             game_loop_pause(game_level, &pacman, game_map, &map_image, &pacman_close).await;
         }
         if !pacman.powered_up {
-            if pacman.aabb(&blinky)
-                || pacman.aabb(&inky)
-                || pacman.aabb(&pinky)
-                || pacman.aabb(&clyde)
+            if pacman.aabb(ghost_coords.0)
+                || pacman.aabb(ghost_coords.1)
+                || pacman.aabb(ghost_coords.2)
+                || pacman.aabb(ghost_coords.3)
             {
                 if pacman.lives > 0 {
                     pacman.lives -= 1;
@@ -73,13 +79,13 @@ pub async fn run() {
         } else {
             pacman.power_up_timer += 1;
             if pacman.power_up_timer <= pacman_power_duration {
-                if pacman.aabb(&blinky) {
+                if pacman.aabb(ghost_coords.0) {
                     blinky.teleport_outside_pen();
-                } else if pacman.aabb(&inky) {
+                } else if pacman.aabb(ghost_coords.1) {
                     inky.teleport_outside_pen();
-                } else if pacman.aabb(&pinky) {
+                } else if pacman.aabb(ghost_coords.2) {
                     pinky.teleport_outside_pen();
-                } else if pacman.aabb(&clyde) {
+                } else if pacman.aabb(ghost_coords.3) {
                     clyde.teleport_outside_pen();
                 }
             } else {
@@ -147,6 +153,7 @@ pub async fn run() {
         if elapsed < frame_duration {
             std::thread::sleep(frame_duration - elapsed);
         }
+
         next_frame().await;
         timer += 1;
     }
